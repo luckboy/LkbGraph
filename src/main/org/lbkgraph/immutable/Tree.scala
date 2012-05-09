@@ -1,7 +1,7 @@
 package org.lbkgraph.immutable
 import org.lbkgraph._
 
-trait Tree[+V, +E <: Product2[V, V]] extends org.lbkgraph.Tree[V, E] with TreeLike[V, E, Graph[V, E]]
+trait Tree[V, E <: EdgeLike[V, E]] extends base.TreeLike[V, E, Tree[V, E]] with base.Tree[V, E]
 {
   
 }
