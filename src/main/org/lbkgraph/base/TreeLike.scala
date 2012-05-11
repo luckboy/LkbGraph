@@ -14,8 +14,17 @@ trait TreeLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E]
   /** The root. */
   def root: V
   
-  /** The branches. */
+  /** The branches from the root. */
   def branches[T1 >: T]: Set[T1]
+  
+  /** The branches from the specified node. */
+  def branchesFrom[T1 >: T](s: V): Set[T1]
+  
+  /** The children from the root. */
+  def childs: Set[V]
+  
+  /** The children from the specified node. */
+  def childsFrom(s: V): Set[V]
   
   /** The pre-order traversal sequence. */
   def preOrder: Seq[V] =
