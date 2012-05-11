@@ -1,12 +1,12 @@
 package org.lbkgraph.base
 import org.lbkgraph._
 
-trait GraphLike[V, E <: EdgeLike[V, E], +T <: GraphLike[V, E, T] with Graph[V, E]] extends collection.SetLike[GraphParam[V, E], T] with collection.Set[GraphParam[V, E]]
-{
-  override def empty: T = throw new Exception
-  
-  override def newBuilder: collection.mutable.Builder[GraphParam[V, E], T] = throw new Exception
-  
+/** A template trait for the graph.
+ * 
+ * @author Łukasz Szpakowski
+ */
+trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E]] extends collection.SetLike[GraphParam[V, E], G]
+{  
   /** The vertices. */
   def vertices: Set[V]
 
@@ -62,8 +62,8 @@ trait GraphLike[V, E <: EdgeLike[V, E], +T <: GraphLike[V, E, T] with Graph[V, E
   def isComplete: Boolean = throw new Exception
   
   /** Creates a transposed graph from the graph. */
-  def transposed: T = throw new Exception
+  def transposed: G = throw new Exception
   
   /** Returns weak connected components from the graph. */
-  def connectedComponents[U >: T]: Set[U] = throw new Exception
+  def connectedComponents[G1 >: G]: Set[G1] = throw new Exception
 }

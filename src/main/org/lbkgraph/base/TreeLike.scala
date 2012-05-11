@@ -1,13 +1,21 @@
 package org.lbkgraph.base
 import org.lbkgraph._
 
-trait TreeLike[V, E <: EdgeLike[V, E], +T <: TreeLike[V, E, T] with Tree[V, E]] extends GraphLike[V, E, T] with Graph[V, E]
+/** A trait for the immutable tree and mutable tree.
+ * 
+ * @author Łukasz Szpakowski
+ */
+trait TreeLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E], +T <: TreeLike[V, E, G, T] with Tree[V, E]] extends GraphLike[V, E, G]
 {
   /** The nodes is the synonym of vertices. */
-  def nodes: Set[V]
+  def nodes: Set[V] =
+    vertices
   
   /** The root. */
   def root: V
+  
+  /** The branches. */
+  def branches[T1 >: T]: Set[T1]
   
   /** The pre-order traversal sequence. */
   def preOrder: Seq[V] =
