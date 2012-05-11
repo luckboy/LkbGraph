@@ -37,6 +37,18 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    */
   def edgesTo(t: V): Set[E]
     
+  /** Finds the specified vertice.
+   * @param v			the edge.
+   * @return			the found vertice.
+   */
+  def findVertice(v: V): Option[V]
+  
+  /** Finds the specified edge.
+   * @param e			the edge.
+   * @return			the found edge.
+   */
+  def findEdge(e: Edge[V]): Option[E]
+  
   /** Creates a tree by the DFS algorithm.
    * @param s			the start vertice.
    * @return			a tree.
