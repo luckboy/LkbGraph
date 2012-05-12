@@ -13,50 +13,54 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
   /** The edges. */
   def edges: Set[E]
   
-  /** Returns the source vertices of the specified vertice. 
-   * @param s			the start vertice.
-   * @return			the source vertices.
+  /** Returns the destination vertices of the specified vertex. 
+   * @param s			the start vertex.
+   * @return			the destination vertices.
    */
-  def verticesFrom(s: V): Set[V]
+  def verticesFrom(s: V): Set[V] =
+    edgesFrom(s).map { _.dest }
   
-  /** Returns the edges from the specified vertice.
-   * @param s			the start vertice.
+  /** Returns the edges from the specified vertex.
+   * @param s			the start vertex.
    * @return			the edges.
    */
   def edgesFrom(s: V): Set[E]
 
-  /** Returns the destination vertices of the specified vertice. 
-   * @param s			the end vertice.
-   * @return			the destination vertices.
+  /** Returns the source vertices of the specified vertex. 
+   * @param s			the end vertex.
+   * @return			the source vertices.
    */
-  def verticesTo(t: V): Set[V]
+  def verticesTo(t: V): Set[V] =
+    edgesFrom(t).map { _.source }
   
-  /** Returns the edges to the specified vertice.
-   * @param s			the end vertice.
+  /** Returns the edges to the specified vertex.
+   * @param s			the end vertex.
    * @return			the edges.
    */
   def edgesTo(t: V): Set[E]
     
-  /** Finds the specified vertice.
+  /** Finds the specified vertex.
    * @param v			the edge.
-   * @return			the found vertice.
+   * @return			the found vertex.
    */
-  def findVertice(v: V): Option[V]
+  def findVertex(v: V): Option[V] =
+    vertices.find(v ==)
   
   /** Finds the specified edge.
    * @param e			the edge.
    * @return			the found edge.
    */
-  def findEdge(e: Edge[V]): Option[E]
+  def findEdge(e: Edge[V]): Option[E] =
+    edges.find { f => f._1 == e._1 && f._2 == e._2 }
   
   /** Creates a tree by the DFS algorithm.
-   * @param s			the start vertice.
+   * @param s			the start vertex.
    * @return			a tree.
    */
   def dfsFrom(s: V): immutable.Tree[V, E] = throw new Exception
   
   /** Creates a tree by the BFS algorithm.
-   * @param s			the start vertice.
+   * @param s			the start vertex.
    * @return			a tree.
    */
   def bfsFrom(s: V): immutable.Tree[V, E] = throw new Exception

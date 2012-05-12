@@ -19,11 +19,11 @@ trait EdgeLike[+V, +E] extends GraphParam[V, E] with Product2[V, V]
   def swap: E
 }
 
-/** A class for the vertice.
+/** A class for the vertex.
  * 
  * @author Łukasz Szpakowski
  */
-case class Vertice[+V](value: V) extends GraphParam[V, Nothing]
+case class Vertex[+V](value: V) extends GraphParam[V, Nothing]
 
 /** A class for the edge without weight.
  * 
