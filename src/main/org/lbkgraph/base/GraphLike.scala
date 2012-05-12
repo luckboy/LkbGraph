@@ -51,9 +51,9 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    * @param f			the convert function.
    * @return			the found edge.
    */
-  def findEdge(e: Edge[V]): Option[E] =
-    edges.find { e2 => e.in == e2.in && e.out == e2.out }
-  
+  def findEdge(p: (V, V)): Option[E] =
+    edges.find { e => e._1 == p._2 && e._2 == p._2 }
+    
   /** Creates a tree by the DFS algorithm.
    * @param s			the start vertex.
    * @return			a tree.
