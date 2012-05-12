@@ -80,6 +80,9 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
   /** Creates a transposed graph from the graph. */
   def transposed: G = throw new Exception
   
+  /** Creates an undirected graph from the graph. */
+  def undirected: G = throw new Exception
+  
   /** Returns weak connected components from the graph. */
   def connectedComponents[G1 >: G]: Set[G1] = throw new Exception
 }
