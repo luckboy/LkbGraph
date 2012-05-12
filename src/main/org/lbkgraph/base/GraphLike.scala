@@ -13,12 +13,12 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
   /** The edges. */
   def edges: Set[E]
   
-  /** Returns the destination vertices of the specified vertex. 
+  /** Returns the output vertices of the specified vertex. 
    * @param s			the start vertex.
-   * @return			the destination vertices.
+   * @return			the output vertices.
    */
   def verticesFrom(s: V): Set[V] =
-    edgesFrom(s).map { _.dest }
+    edgesFrom(s).map { _.out }
   
   /** Returns the edges from the specified vertex.
    * @param s			the start vertex.
@@ -26,12 +26,12 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    */
   def edgesFrom(s: V): Set[E]
 
-  /** Returns the source vertices of the specified vertex. 
+  /** Returns the input vertices of the specified vertex. 
    * @param s			the end vertex.
-   * @return			the source vertices.
+   * @return			the input vertices.
    */
   def verticesTo(t: V): Set[V] =
-    edgesFrom(t).map { _.source }
+    edgesFrom(t).map { _.in }
   
   /** Returns the edges to the specified vertex.
    * @param s			the end vertex.
@@ -48,10 +48,11 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
   
   /** Finds the specified edge.
    * @param e			the edge.
+   * @param f			the convert function.
    * @return			the found edge.
    */
   def findEdge(e: Edge[V]): Option[E] =
-    edges.find { f => f._1 == e._1 && f._2 == e._2 }
+    edges.find { e2 => e.in == e2.in && e.out == e2.out }
   
   /** Creates a tree by the DFS algorithm.
    * @param s			the start vertex.
@@ -79,10 +80,7 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
   
   /** Creates a transposed graph from the graph. */
   def transposed: G = throw new Exception
-  
-  /** Creates an undirected graph from the graph. */
-  def undirected: G = throw new Exception
-  
+    
   /** Returns weak connected components from the graph. */
   def connectedComponents[G1 >: G]: Set[G1] = throw new Exception
 }

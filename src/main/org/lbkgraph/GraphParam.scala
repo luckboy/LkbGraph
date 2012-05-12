@@ -4,7 +4,7 @@ package org.lbkgraph
  * 
  * @author Łukasz Szpakowski
  */
-trait GraphParam[+V, +E]
+sealed trait GraphParam[+V, +E]
 
 /** A template trait for the edge.
  * 
@@ -12,10 +12,14 @@ trait GraphParam[+V, +E]
  */
 trait EdgeLike[+V, +E] extends GraphParam[V, E] with Product2[V, V]
 {
-  def source: V = _1
+  def in: V
     
-  def dest: V = _2
+  def out: V
+ 
+  override def _1: V = in
   
+  override def _2: V = out  
+
   def swap: E
 }
 
@@ -29,18 +33,18 @@ case class Vertex[+V](value: V) extends GraphParam[V, Nothing]
  * 
  * @author Łukasz Szpakowski
  */
-case class Edge[+V](_1: V, _2: V) extends EdgeLike[V, Edge[V]]
+case class Edge[+V](in: V, out: V) extends EdgeLike[V, Edge[V]]
 {
   override def swap: Edge[V] =
-    Edge(_2, _1)
+    Edge(out, in)
 }
 
 /** A class for the weighted edge that has weight.
  * 
  * @author Łukasz Szpakowski
  */
-case class WeightedEdge[+V, +W](_1: V, _2: V, weight: W) extends EdgeLike[V, WeightedEdge[V, W]]
-{
+case class WeightedEdge[+V, +W](in: V, out: V, weight: W) extends EdgeLike[V, WeightedEdge[V, W]]
+{ 
   override def swap: WeightedEdge[V, W] =
-    WeightedEdge(_2, _1, weight)
+    WeightedEdge(out, in, weight)
 }
