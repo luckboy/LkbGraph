@@ -11,10 +11,8 @@ trait TreeLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Graph[
   def root: V
   
   /** The branches from the root. */
-  def branches[T1 >: T]: Set[T1] =
-    branchesFrom[T1](root)
-
-  override def branchesFrom[T1 >: T](s: V): Set[T1]
+  def branches: Set[Tree[V, E]] =
+    branchesFrom(root)
     
   /** The children from the root. */
   def childs: Set[V] =

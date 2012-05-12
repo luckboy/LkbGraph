@@ -10,12 +10,15 @@ trait ForestLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Grap
   /** The nodes is the synonym of vertices. */
   def nodes: Set[V] =
     vertices
+    
+  /** The trees. */
+  def trees: Set[Tree[V, E]]
   
   /** The branches from the specified node. 
    * @param s			the start node.
    * @return			the branches.
    */
-  def branchesFrom[T1 >: Tree[V, E]](s: V): Set[T1]
+  def branchesFrom(s: V): Set[Tree[V, E]]
 
   /** The children from the specified node. 
    * @param s			the start node.
