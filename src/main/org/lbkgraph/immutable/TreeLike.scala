@@ -15,8 +15,8 @@ trait TreeLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Graph[
     branchesFrom(root)
     
   /** The children from the root. */
-  def childs: Set[V] =
-    childsFrom(root)
+  def children: Set[V] =
+    childrenFrom(root)
     
   /** All paths from the root to the leaf. */
   def paths: Set[Path[V, E]] = throw new Exception

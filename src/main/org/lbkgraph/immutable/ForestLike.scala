@@ -22,9 +22,9 @@ trait ForestLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Grap
 
   /** The children from the specified node. 
    * @param s			the start node.
-   * @return			the childs.
+   * @return			the children.
    */
-  def childsFrom(s: V): Set[V]
+  def childrenFrom(s: V): Set[V]
 
   /** The pre-order traversal sequence from the specified node. 
    * @param s			the start node.
