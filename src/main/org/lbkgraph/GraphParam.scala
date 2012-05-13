@@ -65,6 +65,8 @@ case class Vertex[+V](value: V) extends GraphParam[V, Nothing]
 case class DiEdge[+V](in: V, out: V) extends DiEdgeLike[V, DiEdge[V]]
 {
   override def swap: DiEdge[V] = DiEdge(out, in)
+  
+  override def toString: String = in + " --> " + out
 }
 
 /** A class for the directed edge that has weight.
@@ -74,6 +76,8 @@ case class DiEdge[+V](in: V, out: V) extends DiEdgeLike[V, DiEdge[V]]
 case class WeightedDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdgeLike[V, WeightedDiEdge[V, W]] with WeightedEdgeLike[V, W, WeightedDiEdge[V, W]]
 { 
   override def swap: WeightedDiEdge[V, W] = WeightedDiEdge(out, in, weight)
+
+  override def toString: String = in + " -~ " + weight +" -> " + out
 }
 
 /** A class for the undirected edge without weight.
@@ -89,6 +93,8 @@ case class UndiEdge[+V](in: V, out: V) extends UndiEdgeLike[V, UndiEdge[V]]
       case UndiEdge(in2, out2) => (in == in2 && out == out2) || (in == out2 && out == in2)
       case _                   => false
     }
+
+  override def toString: String = in + " --- " + out
 }
 
 /** A class for the undirected edge that has weight.
@@ -106,4 +112,6 @@ case class WeightedUndiEdge[+V, +W](in: V, out: V, weight: W) extends UndiEdgeLi
       case _                                    =>
         false
     }
+
+  override def toString: String = in + " -~ " + weight +" -- " + out
 }
