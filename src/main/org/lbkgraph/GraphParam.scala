@@ -20,6 +20,8 @@ trait EdgeLike[+V, +E] extends GraphParam[V, E] with Product2[V, V]
   
   override def _2: V = out
   
+  def vertices: (V, V) = (in, out)
+  
   def isDirected: Boolean
 
   def swap: E
@@ -43,13 +45,21 @@ trait UndiEdgeLike[+V, +E] extends EdgeLike[V, E]
   override def isDirected: Boolean = false
 }
 
+/** A template trait for the unweighted edge.
+ * 
+ * @author Łukasz Szpakowski
+ */
+trait UnweightedEdgeLike[+V, +E] extends EdgeLike[V, E]
+
 /** A template trait for the weighted edge.
  * 
  * @author Łukasz Szpakowski
  */
-trait WeightedEdgeLike[+V, +W, +E] extends EdgeLike[V, E]
+trait WeightedEdgeLike[+V, +W, +UE, +E] extends EdgeLike[V, E]
 {
   def weight: W
+  
+  def unweightedEdge: UE
 }
 
 /** A class for the vertex.
@@ -62,7 +72,7 @@ case class Vertex[+V](value: V) extends GraphParam[V, Nothing]
  * 
  * @author Łukasz Szpakowski
  */
-case class DiEdge[+V](in: V, out: V) extends DiEdgeLike[V, DiEdge[V]]
+case class DiEdge[+V](in: V, out: V) extends DiEdgeLike[V, DiEdge[V]] with UnweightedEdgeLike[V, DiEdge[V]]
 {
   override def swap: DiEdge[V] = DiEdge(out, in)
   
@@ -73,9 +83,11 @@ case class DiEdge[+V](in: V, out: V) extends DiEdgeLike[V, DiEdge[V]]
  * 
  * @author Łukasz Szpakowski
  */
-case class WeightedDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdgeLike[V, WeightedDiEdge[V, W]] with WeightedEdgeLike[V, W, WeightedDiEdge[V, W]]
+case class WeightedDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdgeLike[V, WeightedDiEdge[V, W]] with WeightedEdgeLike[V, W, DiEdge[V], WeightedDiEdge[V, W]]
 { 
   override def swap: WeightedDiEdge[V, W] = WeightedDiEdge(out, in, weight)
+
+  override def unweightedEdge: DiEdge[V] = DiEdge(in, out)
 
   override def toString: String = in + " -~ " + weight +" -> " + out
 }
@@ -84,7 +96,7 @@ case class WeightedDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdgeLike[V
  * 
  * @author Łukasz Szpakowski
  */
-case class UndiEdge[+V](in: V, out: V) extends UndiEdgeLike[V, UndiEdge[V]]
+case class UndiEdge[+V](in: V, out: V) extends UndiEdgeLike[V, UndiEdge[V]] with UnweightedEdgeLike[V, UndiEdge[V]]
 {
   override def swap: UndiEdge[V] = UndiEdge(out, in)
     
@@ -101,10 +113,12 @@ case class UndiEdge[+V](in: V, out: V) extends UndiEdgeLike[V, UndiEdge[V]]
  * 
  * @author Łukasz Szpakowski
  */
-case class WeightedUndiEdge[+V, +W](in: V, out: V, weight: W) extends UndiEdgeLike[V, WeightedUndiEdge[V, W]] with WeightedEdgeLike[V, W, WeightedUndiEdge[V, W]]
+case class WeightedUndiEdge[+V, +W](in: V, out: V, weight: W) extends UndiEdgeLike[V, WeightedUndiEdge[V, W]] with WeightedEdgeLike[V, W, UndiEdge[V], WeightedUndiEdge[V, W]]
 { 
   override def swap: WeightedUndiEdge[V, W] = WeightedUndiEdge(out, in, weight)
 
+  override def unweightedEdge: UndiEdge[V] = UndiEdge(in, out)
+  
   override def equals(that: Any) =
     that match {
       case WeightedUndiEdge(in2, out2, weight2) => 
