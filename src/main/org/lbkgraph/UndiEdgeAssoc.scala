@@ -1,6 +1,6 @@
 package org.lbkgraph
 
-class UndiEdgeAssoc[V](in: V) 
+class UndiEdgeAssoc[V](x: V) 
 {
-  def --- (out: V) = UndiEdge(in, out)
+  def ~ (y: V) = UndiEdge(x, y)
 }

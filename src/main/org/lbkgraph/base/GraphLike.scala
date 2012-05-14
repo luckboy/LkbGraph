@@ -1,6 +1,5 @@
 package org.lbkgraph.base
 import org.lbkgraph._
-import org.lbkgraph.generic.CanFind
 
 /** A template trait for the graph.
  * 
@@ -52,8 +51,8 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    * @param f			the convert function.
    * @return			the found edge.
    */
-  def findEdge[E1](e: E1)(implicit cf: CanFind[Set[E], E, E1]): Option[E] =
-    cf().find(edges)(e)
+  def findEdge[E1, E2](e: E1)(implicit cf: CanFind[Set[E], E2, E1]): Option[E2] =
+    cf.find(edges)(e)
     
   /** Creates a tree by the DFS algorithm.
    * @param s			the start vertex.
