@@ -70,7 +70,7 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    * @param ss			the start vertices.
    * @return			a trees.
    */
-  def bfsFromN(ss: Seq[V]): Seq[immutable.Tree[V, E]] = throw new Exception
+  def bfsFromN(ss: Seq[V]): Map[V, immutable.Tree[V, E]] = throw new Exception
   
   /** Checks whether the graph is connected. */
   def isConnected: Boolean = throw new Exception

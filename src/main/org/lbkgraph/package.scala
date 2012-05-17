@@ -17,7 +17,7 @@ package object lbkgraph
         es.find(e1 ==)
     }
   
-  implicit def weightedEdgeSetCanFindUnweightedEdge[V, E <: WeightedEdgeLike[V, _, E1, E], E1 <: UnweightedEdgeLike[V, E1]] =
+  implicit def wEdgeSetCanFindUnwEdge[V, E <: WEdgeLike[V, _, E1, E], E1 <: UnwEdgeLike[V, E1]] =
     new CanFind[Set[E], E, E1] {
       override def find(es: Set[E])(e1: E1): Option[E] =
         es.find { e1 == _.toUnweightedEdge }
