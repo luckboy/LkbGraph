@@ -60,17 +60,23 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    */
   def dfsFrom(s: V): immutable.Tree[V, E] = throw new Exception
   
+  /** Creates a tree by the DFS algorithm that begins searching for the stack.
+   * @param ss			the stack.
+   * @return			a trees.
+   */
+  def dfsFromStack(stck: Seq[V]): Map[V, immutable.Tree[V, E]] = throw new Exception
+  
   /** Creates a tree by the BFS algorithm.
    * @param s			the start vertex.
    * @return			a tree.
    */
   def bfsFrom(s: V): immutable.Tree[V, E] = throw new Exception
-  
-  /** Creates a tree by the BFS algorithm that begins searching from many sources.
-   * @param ss			the start vertices.
+
+  /** Creates a tree by the BFS algorithm that begins searching for the queue.
+   * @param ss			the queue.
    * @return			a trees.
    */
-  def bfsFromN(ss: Seq[V]): Map[V, immutable.Tree[V, E]] = throw new Exception
+  def bfsFromQueue(q: Seq[V]): Map[V, immutable.Tree[V, E]] = throw new Exception
   
   /** Checks whether the graph is connected. */
   def isConnected: Boolean = throw new Exception

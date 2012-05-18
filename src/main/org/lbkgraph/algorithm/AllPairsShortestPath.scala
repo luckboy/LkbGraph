@@ -11,10 +11,21 @@ class AllPairsShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBoun
 {
   /** Finds the shortest paths for all pairs. If any path from the some two vertices is non-exist, 
    * there doesn't return the path for two vertices.
-   * @return			the shortest paths with the distances.
    */
-  def allShortestPaths(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (W, Path[V, E])] =
+  def allShortestPaths(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, E])] =
     strategy.allShortestPaths[V, W, E, G](g)
+    
+  /** Finds the minimum distances for all pairs. If any path from the some two vertices is non-exist, 
+   * there doesn't return the path for two vertices.
+   */
+  def allMinDistances(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), W] =
+    strategy.allMinDistances[V, W, E, G](g)
+
+  /** Finds the shortest path with the minimum distances for all pairs. If any path from the some two vertices is non-exist, 
+   * there doesn't return the path for two vertices.
+   */
+  def allShortestPathAndMinDists(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, E], W)] =
+    strategy.allShortestPathsAndMinDists[V, W, E, G](g)
 }
 
 /** A singleton for the all pairs shortest path problem.
