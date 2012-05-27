@@ -7,37 +7,54 @@ import org.lbkgraph._
  */
 trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E]] extends collection.SetLike[GraphParam[V, E], G]
 {  
+  /** The vertex set. */
+  def vertexSet: Set[V] =
+    vertices.toSet
+
   /** The vertices. */
-  def vertices: Set[V]
+  def vertices: Iterable[V]
+  
+  /** The vertex iterator. */
+  def vertexIterator: Iterator[V] =
+    vertices.toIterator
+
+  /** The edge set. */
+  def edgeSet: Iterable[E] =
+    edges.toSet
 
   /** The edges. */
-  def edges: Set[E]
+  def edges: Iterable[E]
+  
+  /** The edge iterator. */
+  def edgeIterator: Iterator[E] =
+    edges.toIterator
   
   /** Returns the output vertices of the specified vertex. 
    * @param s			the start vertex.
    * @return			the output vertices.
    */
-  def verticesFrom(s: V): Set[V] =
+  def verticesFrom(s: V): Iterable[V] =
     edgesFrom(s).map { _.out }
   
   /** Returns the edges from the specified vertex.
    * @param s			the start vertex.
    * @return			the edges.
    */
-  def edgesFrom(s: V): Set[E]
+  def edgesFrom(s: V): Iterable[E]
 
   /** Returns the input vertices of the specified vertex. 
    * @param s			the end vertex.
    * @return			the input vertices.
    */
-  def verticesTo(t: V): Set[V] =
+  def verticesTo(t: V): Iterable[V] =
     edgesFrom(t).map { _.in }
   
   /** Returns the edges to the specified vertex.
    * @param s			the end vertex.
    * @return			the edges.
    */
-  def edgesTo(t: V): Set[E]
+  def edgesTo(t: V): Iterable[E] =
+    edges.filter { _.out == t }
     
   /** Finds the specified vertex.
    * @param v			the edge.
@@ -51,7 +68,7 @@ trait GraphLike[V, E <: EdgeLike[V, E], +G <: GraphLike[V, E, G] with Graph[V, E
    * @param f			the convert function.
    * @return			the found edge.
    */
-  def findEdge[E1 <: EdgeLike[V, _], E2](e: E1)(implicit cf: CanFind[Set[E], E2, E1]): Option[E2] =
+  def findEdge[E1 <: EdgeLike[V, _], E2](e: E1)(implicit cf: CanFind[Iterable[E], E2, E1]): Option[E2] =
     cf.find(edges)(e)
     
   /** Creates a tree by the DFS algorithm.

@@ -7,9 +7,17 @@ import org.lbkgraph._
  */
 trait TreeLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Graph[V, E], +T <: TreeLike[V, E, G, T] with Tree[V, E]] extends base.GraphLike[V, E, G]
 {
+  /** The nodes is the synonym of vertexSet. */
+  def nodeSet: Iterable[V] =
+    vertexSet
+  
   /** The nodes is the synonym of vertices. */
-  def nodes: Set[V] =
+  def nodes: Iterable[V] =
     vertices
+
+  /** The nodes is the synonym of vertexSet. */
+  def nodeIterator: Iterator[V] =
+    vertexIterator
 
   /** The root. */
   def root: V
