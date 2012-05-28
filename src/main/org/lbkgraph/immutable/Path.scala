@@ -5,4 +5,4 @@ import org.lbkgraph._
  * 
  * @author Łukasz Szpakowski
  */
-trait Path[V, E <: EdgeLike[V, E]] extends PathLike[V, E, Graph[V, E], Path[V, E]] with Tree[V, E]
+trait Path[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends PathLike[V, X, E, Graph[V, X, E], Path[V, X, E]] with Tree[V, X, E]

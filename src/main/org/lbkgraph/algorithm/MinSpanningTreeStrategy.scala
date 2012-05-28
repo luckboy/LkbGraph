@@ -8,10 +8,10 @@ import org.lbkgraph.immutable._
  */
 trait MinSpanningTreeStrategy
 {
-  def minSpanningTree[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(implicit cmp: Ordering[W]): Option[G] = {
+  def minSpanningTree[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W]): Option[G] = {
     val mst = minSpanningTrees[V, W, G](g)
     if(mst.size == 1) mst.firstOption else None
   }
 
-  def minSpanningTrees[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(implicit cmp: Ordering[W]): Set[G]
+  def minSpanningTrees[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W]): Set[G]
 }

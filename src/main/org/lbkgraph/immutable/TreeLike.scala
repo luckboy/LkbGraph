@@ -5,7 +5,7 @@ import org.lbkgraph._
  * 
  * @author Łukasz Szpakowski
  */
-trait TreeLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Graph[V, E], +T <: TreeLike[V, E, G, T] with Tree[V, E]] extends base.GraphLike[V, E, G]
+trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, E, G] with Graph[V, X, E], +T <: TreeLike[V, X, E, G, T] with Tree[V, X, E]] extends base.GraphLike[V, X, E, G]
 {
   /** The nodes is the synonym of vertexSet. */
   def nodeSet: Iterable[V] =
@@ -23,14 +23,14 @@ trait TreeLike[V, E <: EdgeLike[V, E], +G <: base.GraphLike[V, E, G] with Graph[
   def root: V
 
   /** The branches from the root. */
-  def branches: Set[Tree[V, E]] =
+  def branches: Set[Tree[V, X, E]] =
     branchesFrom(root)
     
   /** The branches from the specified node. 
    * @param s			the start node.
    * @return			the branches.
    */
-  def branchesFrom(s: V): Set[Tree[V, E]]
+  def branchesFrom(s: V): Set[Tree[V, X, E]]
 
   /** The children from the root. */
   def children: Set[V] =

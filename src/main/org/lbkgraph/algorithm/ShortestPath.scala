@@ -7,7 +7,7 @@ import org.lbkgraph.immutable._
  * 
  * @author Łukasz Szpakowski
  */
-class ShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, G]](g: G)(implicit num: Numeric[W])
+class ShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V, Weighted[W], E, G]](g: G)(implicit num: Numeric[W])
 {  
   /** Finds the shortest path from the start vertex to the end vertex.
    * @param s			the start vertex.
@@ -15,7 +15,7 @@ class ShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, 
    * @return			the shortest path if two specified vertices are indirectly connected or directly connected, None 
    * 					otherwise.
    */
-  def shortestPathFromTo(s: V, t: V)(implicit strategy: ShortestPathStrategy): Option[Path[V, E]] =
+  def shortestPathFromTo(s: V, t: V)(implicit strategy: ShortestPathStrategy): Option[Path[V, Weighted[W], E]] =
     strategy.shortestPathFromTo[V, W, E, G](g, s, t)
   
   /** Finds the shortest paths from the specified vertex. If any path from the start vertex to some vertex is non-exist, 
@@ -23,7 +23,7 @@ class ShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, 
    * @param s			the start vertex.
    * @return			the shortest paths.
    */
-  def shortestPathsFrom(s: V)(implicit strategy: ShortestPathStrategy): Map[V, Path[V, E]] =
+  def shortestPathsFrom(s: V)(implicit strategy: ShortestPathStrategy): Map[V, Path[V, Weighted[W], E]] =
     strategy.shortestPathsFrom[V, W, E, G](g, s)
   
   /** Finds the minimum distance from the start vertex to the end vertex.
@@ -49,7 +49,7 @@ class ShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, 
    * @return			the shorted path and the minimum distance if this two vertices are indirectly connected, None 
    * 					otherwise.
    */
-  def shortestPathAndMinDistFromTo(s: V, t: V)(implicit strategy: ShortestPathStrategy): Option[(Path[V, E], W)] =
+  def shortestPathAndMinDistFromTo(s: V, t: V)(implicit strategy: ShortestPathStrategy): Option[(Path[V, Weighted[W], E], W)] =
     strategy.shortestPathAndMinDistFromTo[V, W, E, G](g, s, t)
   
   /** Finds the shortest paths with the minimum distances from the start vertex. If any path from the start vertex to some vertex is non-exist, 
@@ -57,7 +57,7 @@ class ShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, 
    * @param s			the start vertex.
    * @return			the the shortest paths with the minimum distances.
    */
-  def shortestPathAndMinDistsFrom(s: V, t: V)(implicit strategy: ShortestPathStrategy): Map[V, (Path[V, E], W)] =
+  def shortestPathAndMinDistsFrom(s: V, t: V)(implicit strategy: ShortestPathStrategy): Map[V, (Path[V, Weighted[W], E], W)] =
     strategy.shortestPathsAndMinDistsFrom[V, W, E, G](g, s)
 }
 
@@ -67,6 +67,6 @@ class ShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, 
  */
 object ShortestPath
 {
-  implicit def graphToShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, G]](g: base.GraphBound[V, E, G])(implicit num: Numeric[W]) =
-    new ShortestPath[V, W, E, base.GraphBound[V, E, G]](g)
+  implicit def graphToShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V, Weighted[W], E, G]](g: base.GraphBound[V, Weighted[W], E, G])(implicit num: Numeric[W]) =
+    new ShortestPath[V, W, E, base.GraphBound[V, Weighted[W], E, G]](g)
 }

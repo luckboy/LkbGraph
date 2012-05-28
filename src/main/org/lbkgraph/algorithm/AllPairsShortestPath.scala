@@ -7,12 +7,12 @@ import org.lbkgraph.immutable._
  * 
  * @author Łukasz Szpakowski
  */
-class AllPairsShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, G]](g: G)(implicit num: Numeric[W])
+class AllPairsShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V, Weighted[W], E, G]](g: G)(implicit num: Numeric[W])
 {
   /** Finds the shortest paths for all pairs. If any path from the some two vertices is non-exist, 
    * there doesn't return the path for two vertices.
    */
-  def allShortestPaths(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, E])] =
+  def allShortestPaths(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, Weighted[W], E])] =
     strategy.allShortestPaths[V, W, E, G](g)
     
   /** Finds the minimum distances for all pairs. If any path from the some two vertices is non-exist, 
@@ -24,7 +24,7 @@ class AllPairsShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBoun
   /** Finds the shortest path with the minimum distances for all pairs. If any path from the some two vertices is non-exist, 
    * there doesn't return the path for two vertices.
    */
-  def allShortestPathAndMinDists(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, E], W)] =
+  def allShortestPathAndMinDists(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, Weighted[W], E], W)] =
     strategy.allShortestPathsAndMinDists[V, W, E, G](g)
 }
 
@@ -34,6 +34,6 @@ class AllPairsShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBoun
  */
 object AllPairsShortestPath
 {
-  implicit def graphToAllPairsShortestPath[V, W, E <: WEdgeLike[V, W, _, E], G <: base.GraphBound[V, E, G]](g: base.GraphBound[V, E, G])(implicit num: Numeric[W]) =
-    new AllPairsShortestPath[V, W, E, base.GraphBound[V, E, G]](g)
+  implicit def graphToAllPairsShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V, Weighted[W], E, G]](g: base.GraphBound[V, Weighted[W], E, G])(implicit num: Numeric[W]) =
+    new AllPairsShortestPath[V, W, E, base.GraphBound[V, Weighted[W], E, G]](g)
 }

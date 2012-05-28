@@ -6,7 +6,7 @@ import org.lbkgraph.immutable._
  * 
  * @author Łukasz Szpakowski
  */
-class Kruskal[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(implicit cmp: Ordering[W])
+class Kruskal[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W])
 {
   /** Finds the minimum spanning tree by Kruskal's algorithm. */
   def kruskalMinSpanningTree: Option[G] = 
@@ -22,9 +22,9 @@ class Kruskal[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(implicit 
  */
 object Kruskal extends MinSpanningTreeStrategy
 {  
-  implicit def graphToKruskal[V, W, G  <: base.GraphBound[V, WUndiEdge[V, W], G]](g: base.GraphBound[V, WUndiEdge[V, W], G])(implicit cmp: Ordering[W]) =
-    new Kruskal[V, W, base.GraphBound[V, WUndiEdge[V, W], G]](g)
+  implicit def graphToKruskal[V, W, G  <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: base.GraphBound[V, Weighted[W], UndiEdge, G])(implicit cmp: Ordering[W]) =
+    new Kruskal[V, W, base.GraphBound[V, Weighted[W], UndiEdge, G]](g)
 
-  override def minSpanningTrees[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(implicit cmp: Ordering[W]): Set[G] =
+  override def minSpanningTrees[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W]): Set[G] =
     new Kruskal[V, W, G](g).kruskalMinSpanningTrees
 }

@@ -2,5 +2,5 @@ package org.lbkgraph
 
 package object base
 {
-  type GraphBound[V, E <: EdgeLike[V, E] , +G <: GraphLike[V, E, G] with Graph[V, E]] = GraphLike[V, E, G] with Graph[V, E]
+  type GraphBound[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E] , +G <: GraphLike[V, X, E, G] with Graph[V, X, E]] = GraphLike[V, X, E, G] with Graph[V, X, E]
 }

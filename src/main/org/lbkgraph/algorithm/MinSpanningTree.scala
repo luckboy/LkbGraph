@@ -6,7 +6,7 @@ import org.lbkgraph.immutable._
  * 
  * @author Łukasz Szpakowski
  */
-class MinSpanningTree[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(implicit cmp: Ordering[W])
+class MinSpanningTree[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W])
 {
   /** Finds the minimum spanning tree. */
   def minSpanningTree(implicit strategy: MinSpanningTreeStrategy): Option[G] =
@@ -23,6 +23,6 @@ class MinSpanningTree[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: G)(i
  */
 object MinSpanningTree
 {
-  def minSpanningTreeToGraph[V, W, G <: base.GraphBound[V, WUndiEdge[V, W], G]](g: base.GraphBound[V, WUndiEdge[V, W], G])(implicit cmp: Ordering[W]) =
-    new MinSpanningTree[V, W, base.GraphBound[V, WUndiEdge[V, W], G]](g)
+  def minSpanningTreeToGraph[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: base.GraphBound[V, Weighted[W], UndiEdge, G])(implicit cmp: Ordering[W]) =
+    new MinSpanningTree[V, W, base.GraphBound[V, Weighted[W], UndiEdge, G]](g)
 }

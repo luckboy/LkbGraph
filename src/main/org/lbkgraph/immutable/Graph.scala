@@ -6,12 +6,12 @@ import org.lbkgraph._
  * 
  * @author Łukasz Szpakowski
  */
-trait Graph[V, E <: EdgeLike[V, E]] extends base.GraphLike[V, E, Graph[V, E]] with base.Graph[V, E]
+trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.GraphLike[V, X, E, Graph[V, X, E]] with base.Graph[V, X, E]
 {
-  override def empty: Graph[V, E] =
+  override def empty: Graph[V, X, E] = throw new Exception
     Graph.empty
   
-  override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, E], Graph[V, E]] = 
+  override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, X, E], Graph[V, X, E]] = throw new Exception
     Graph.newBuilder
 }
 
@@ -21,69 +21,65 @@ trait Graph[V, E <: EdgeLike[V, E]] extends base.GraphLike[V, E, Graph[V, E]] wi
  */
 object Graph
 {
-  def empty[V, E <: EdgeLike[V, E]]: Graph[V, E] = 
-    new ImplGraph[V, E](Map())
+  def empty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: Graph[V, X, E] = 
+    new ImplGraph[V, X, E](Map())
   
-  def newBuilder[V, E <: EdgeLike[V, E]]: collection.mutable.Builder[GraphParam[V, E], Graph[V, E]] =
-    new collection.mutable.SetBuilder(empty)
+  def newBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z,  E]]: collection.mutable.Builder[GraphParam[V, X, E], Graph[V, X, E]] =
+    new collection.mutable.SetBuilder[GraphParam[V, X, E], Graph[V, X, E]](empty)
   
-  private class ImplGraph[V, E <: EdgeLike[V, E]](val mEdgeMaps: Map[V, Map[GenUnwEdge[V], E]]) extends Graph[V, E]
+  private class ImplGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](val mEdgeMaps: Map[V, Map[E[V, Unweighted], E[V, X]]]) extends Graph[V, X, E]
   {
-    lazy val mParams: Set[GraphParam[V, E]] = vertexSet.map { Vertex(_) } ++ edgeSet
+    lazy val mParams: Set[GraphParam[V, X, E]] = vertexSet.map { Vertex(_) } ++ edgeSet
     
     override def vertices: Iterable[V] =
       mEdgeMaps.keys
       
-    override def edges: Iterable[E] =
+    override def edges: Iterable[E[V, X]] =
       mEdgeMaps.flatMap { _._2.map { _._2 } }.toSet
       
     private def edgeMapFrom(s: V) =
-      mEdgeMaps.getOrElse(s, ListMap[GenUnwEdge[V], E]())
+      mEdgeMaps.getOrElse(s, ListMap[E[V, Unweighted], E[V, X]]())
       
-    override def edgesFrom(s: V): Iterable[E] =
+    override def edgesFrom(s: V): Iterable[E[V, X]] =
       edgeMapFrom(s).values
-      
-    override def contains(param: GraphParam[V, E]): Boolean =
-      (param: @unchecked) match {
-        case Vertex(v) => mEdgeMaps.keys.exists(v ==) 
-        case e: E      => edgesFrom(e.in).exists(e ==)
-      }
-    
-    override def iterator: Iterator[GraphParam[V, E]] =
+
+    override def iterator: Iterator[GraphParam[V, X, E]] =
       mParams.toIterator
+
+    override def containsVertex(v: V): Boolean =
+      mEdgeMaps.keys.exists(v ==)
+      
+    override def containsEdge(e: E[V, X]): Boolean =
+      edgesFrom(e.in).exists(e ==)
+          
+    override def +/ (v: V): Graph[V, X, E] =
+      new ImplGraph(mEdgeMaps + (v -> ListMap[E[V, Unweighted], E[V, X]]()))
+      
+    override def +~ (e: E[V, X]): Graph[V, X, E] =
+      if(e._1 != e._2) {
+        val newEdgeMaps1 = mEdgeMaps + (e.in -> (edgeMapFrom(e.in) + (e.toUnweightedEdge -> e)))
+        val newEdgeMaps2 = if(e.isDirected)
+            newEdgeMaps1 + (e.out -> edgeMapFrom(e.out))
+          else
+            newEdgeMaps1 + (e.out -> (edgeMapFrom(e.out) + (e.swap.toUnweightedEdge -> e.swap)))
+        new ImplGraph(newEdgeMaps2)
+      } else
+        this
     
-    override def + (param: GraphParam[V, E]): Graph[V, E] =
-      (param: @unchecked) match {
-        case Vertex(v) => 
-          new ImplGraph(mEdgeMaps + (v -> ListMap[GenUnwEdge[V], E]()))
-        case e: E      =>
-          if(e._1 != e._2) {
-            val newEdgeMaps1 = mEdgeMaps + (e.in -> (edgeMapFrom(e.in) + (e.toUnweightedEdge -> e)))
-            val newEdgeMaps2 = if(e.isDirected)
-                newEdgeMaps1 + (e.out -> edgeMapFrom(e.out))
-              else
-                newEdgeMaps1 + (e.out -> (edgeMapFrom(e.out) + (e.swap.toUnweightedEdge -> e.swap)))
-            new ImplGraph(newEdgeMaps2)
-          } else
-            this
-      }
-    
-    override def - (param: GraphParam[V, E]): Graph[V, E] =
-      (param: @unchecked) match {
-        case Vertex(v) =>
-          new ImplGraph(mEdgeMaps.map { case (u, em) => (u -> em.filter { _._1.out == v }) } - v)
-        case e: E      =>
-          if(e._1 != e._2) {
-            val newEdgeMaps1 = mEdgeMaps + (e.in -> (edgeMapFrom(e.in).filterNot { _._2 == e }))
-            val newEdgeMaps2 = if(e.isDirected)
-               	newEdgeMaps1
-              else
-                newEdgeMaps1 + (e.out -> (edgeMapFrom(e.out).filterNot { _._2 == e }))
-            new ImplGraph(newEdgeMaps2)
-          } else
-            this
-      }
-    
+    override def -/ (v: V): Graph[V, X, E] =
+      new ImplGraph(mEdgeMaps.map { case (u, em) => (u -> em.filter { _._1.out == v }) } - v)      
+      
+    override def -~! (e: E[V, Unweighted]): Graph[V, X, E] =
+      if(e._1 != e._2) {
+        val newEdgeMaps1 = mEdgeMaps + (e.in -> (edgeMapFrom(e.in) - e))
+        val newEdgeMaps2 = if(e.isDirected)
+            newEdgeMaps1
+          else
+            newEdgeMaps1 + (e.out -> (edgeMapFrom(e.out) - e))
+        new ImplGraph(newEdgeMaps2)
+      } else
+        this
+      
     override def stringPrefix: String =
       "Graph"
   }
@@ -92,6 +88,6 @@ object Graph
    * @param params		the vertices and / or the edges.
    * @return			a new graph.
    */
-  def apply[V, E <: EdgeLike[V, E]](params: GraphParam[V, E]*): Graph[V, E] =
-    (newBuilder[V, E] ++= params).result
+  def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](params: GraphParam[V, X, E]*): Graph[V, X, E] =
+    (newBuilder[V, X, E] ++= params).result
 }

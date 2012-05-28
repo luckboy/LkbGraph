@@ -5,11 +5,11 @@ import org.lbkgraph._
  * 
  * @author Łukasz Szpakowski
  */
-trait Graph[V, E <: EdgeLike[V, E]] extends GraphLike[V, E, Graph[V, E]] with Set[GraphParam[V, E]]
+trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends GraphLike[V, X, E, Graph[V, X, E]] with Set[GraphParam[V, X, E]]
 {
-  override def empty: Graph[V, E] =
+  override def empty: Graph[V, X, E] = throw new Exception
     immutable.Graph.empty
   
-  override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, E], Graph[V, E]] =
+  override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, X, E], Graph[V, X, E]] = throw new Exception
     immutable.Graph.newBuilder
 }
