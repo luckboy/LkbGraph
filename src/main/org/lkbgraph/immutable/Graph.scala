@@ -1,6 +1,6 @@
-package org.lbkgraph.immutable
+package org.lkbgraph.immutable
 import scala.collection.immutable.ListMap
-import org.lbkgraph._
+import org.lkbgraph._
 
 /** A trait for the immutable graph.
  * 

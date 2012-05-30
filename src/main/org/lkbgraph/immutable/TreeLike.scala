@@ -1,5 +1,5 @@
-package org.lbkgraph.immutable
-import org.lbkgraph._
+package org.lkbgraph.immutable
+import org.lkbgraph._
 
 /** A template trait for the immutable tree.
  * 

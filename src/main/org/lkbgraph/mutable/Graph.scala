@@ -1,5 +1,5 @@
-package org.lbkgraph.mutable
-import org.lbkgraph._
+package org.lkbgraph.mutable
+import org.lkbgraph._
 
 /** A trait for mutable graph. 
  * 

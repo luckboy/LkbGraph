@@ -3,7 +3,7 @@ package org
 /**
  * @author Łukasz Szpakowski
  */
-package object lbkgraph 
+package object lkbgraph 
 {
   implicit def tuple2ToDiEdge[V](x: (V, V)) =
     new UnwDiEdge(x._1, x._2)

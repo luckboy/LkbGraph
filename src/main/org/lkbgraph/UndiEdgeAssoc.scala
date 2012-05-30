@@ -1,4 +1,4 @@
-package org.lbkgraph
+package org.lkbgraph
 
 class UndiEdgeAssoc[V](x: V) 
 {

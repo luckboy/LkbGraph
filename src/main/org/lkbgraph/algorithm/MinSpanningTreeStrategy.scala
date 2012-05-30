@@ -1,6 +1,6 @@
-package org.lbkgraph.algorithm
-import org.lbkgraph._
-import org.lbkgraph.immutable._
+package org.lkbgraph.algorithm
+import org.lkbgraph._
+import org.lkbgraph.immutable._
 
 /** A trait for the strategy of the minimum spanning tree.
  * 

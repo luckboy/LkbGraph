@@ -1,6 +1,6 @@
-package org.lbkgraph.base
+package org.lkbgraph.base
 import scala.collection.GenTraversableOnce
-import org.lbkgraph._
+import org.lkbgraph._
 
 /** A template trait for the graph.
  * 

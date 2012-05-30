@@ -1,4 +1,4 @@
-package org.lbkgraph
+package org.lkbgraph
 
 /** A trait for graph parameter.
  * 

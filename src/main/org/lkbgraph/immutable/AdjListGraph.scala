@@ -1,5 +1,5 @@
-package org.lbkgraph.immutable
-import org.lbkgraph._
+package org.lkbgraph.immutable
+import org.lkbgraph._
 
 /** A trait for the graph representation of the adjacency list.
  * 

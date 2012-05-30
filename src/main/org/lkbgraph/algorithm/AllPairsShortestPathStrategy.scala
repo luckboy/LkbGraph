@@ -1,7 +1,7 @@
-package org.lbkgraph.algorithm
+package org.lkbgraph.algorithm
 import scala.math.Numeric
-import org.lbkgraph._
-import org.lbkgraph.immutable._
+import org.lkbgraph._
+import org.lkbgraph.immutable._
 
 /** A class for the strategy of the all pairs shortest path problem.
  * 

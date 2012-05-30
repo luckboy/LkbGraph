@@ -1,5 +1,5 @@
-package org.lbkgraph.base
-import org.lbkgraph._
+package org.lkbgraph.base
+import org.lkbgraph._
 
 /** A trait for the graph representation of the adjacency list.
  * 

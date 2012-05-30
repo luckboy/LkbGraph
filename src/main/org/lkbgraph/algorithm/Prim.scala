@@ -1,6 +1,6 @@
-package org.lbkgraph.algorithm
-import org.lbkgraph._
-import org.lbkgraph.immutable._
+package org.lkbgraph.algorithm
+import org.lkbgraph._
+import org.lkbgraph.immutable._
 
 /** A class for the implementation of Prim's algorithm.
  * 
