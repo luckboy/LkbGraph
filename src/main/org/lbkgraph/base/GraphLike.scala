@@ -74,7 +74,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
    * @param v			a new vertex.
    * @return			a copy of the graph.
    */
-  def +/ (v: V): G
+  def +@ (v: V): G
   
   /** Returns a copy of the graph with a new edge.
    * @param e			a new edge.
@@ -86,7 +86,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
    * @param v			the vertex.
    * @return			a copy of the graph.
    */
-  def -/ (v: V): G
+  def -@ (v: V): G
   
   /** Returns a copy of the graph without the specified edge.
    * @param e			the edge.
@@ -107,7 +107,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
    */
   def -!(param: GraphParam[V, Unweighted, E]): G =
     (param: @unchecked) match {
-      case Vertex(v)           => -/(v)
+      case Vertex(v)           => -@(v)
       case e: E[V, Unweighted] => -~!(e)
     }
   
@@ -172,13 +172,13 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
 
   override def + (param: GraphParam[V, X, E]): G =
     (param: @unchecked) match {
-      case Vertex(v)  => +/(v)
+      case Vertex(v)  => +@(v)
       case e: E[V, X] => +~(e)
     }
 
   override def - (param: GraphParam[V, X, E]): G =
     (param: @unchecked) match {
-      case Vertex(v)  => -/(v)
+      case Vertex(v)  => -@(v)
       case e: E[V, X] => -~(e)
     }
 }

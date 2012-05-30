@@ -10,7 +10,7 @@ sealed trait GraphParam[+V, +X, +E[+_, +_]]
  * 
  * @author Łukasz Szpakowski
  */
-sealed trait EdgeLike[+V, +X, +E[+_, +_]] extends GraphParam[V, X, E] with Product2[V, V]
+sealed trait EdgeLike[+V, +X, E[+_, +_]] extends GraphParam[V, X, E] with Product2[V, V]
 {
   def vertices: (V, V) =
     (_1, _2)
@@ -26,6 +26,11 @@ sealed trait EdgeLike[+V, +X, +E[+_, +_]] extends GraphParam[V, X, E] with Produ
   def hasWeight: Boolean
   
   def toUnweightedEdge: E[V, Unweighted]
+  
+  def ==~ [V1 >: V](e: E[V1, _]): Boolean
+  
+  def !=~ [V1 >: V](e: E[V1, _]): Boolean =
+    !(this ==~ e)
 }
 
 /** A trait for the directed edge.
@@ -36,6 +41,9 @@ sealed trait DiEdge[+V, +X] extends EdgeLike[V, X, DiEdge]
 {
   override def isDirected: Boolean =
     true
+ 
+  override def ==~ [V1 >: V](e: DiEdge[V1, _]): Boolean =
+    in == e.in && out == e.out
     
   def toUndirectedEdge: UndiEdge[V, X]
 }
@@ -49,6 +57,9 @@ sealed trait UndiEdge[+V, +X] extends EdgeLike[V, X, UndiEdge]
   override def isDirected: Boolean =
     false
     
+  override def ==~ [V1 >: V](e: UndiEdge[V1, _]): Boolean =
+    (_1 == e._1 && _2 == e._2) || (_1 == e._2 && _2 == e._1)
+
   def directedEdges: (DiEdge[V, X], DiEdge[V, X])
 }
 
