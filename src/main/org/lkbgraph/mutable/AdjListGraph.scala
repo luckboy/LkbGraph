@@ -23,7 +23,7 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
   override def +~= (e: E[V, X]): this.type = {
     if(e._1 != e._2) {
       edgeLists += (e.in -> edgeListFromWithEdge(e.in, e))
-      if(!e.isDirected) edgeLists += (e.out -> edgeListFromWithEdge(e.out, e))
+      if(!e.isDirected) edgeLists += (e.out -> edgeListFromWithEdge(e.out, e.swap))
     }
     this
   }
