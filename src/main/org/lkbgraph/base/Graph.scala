@@ -1,11 +1,11 @@
 package org.lkbgraph.base
 import org.lkbgraph._
 
-/** A trait for the immutable graph and the mutable graph.
+/** A trait for immutable graph and / or  mutable graph.
  * 
  * @author Łukasz Szpakowski
  */
-trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends GraphLike[V, X, E, Graph[V, X, E]] with Set[GraphParam[V, X, E]]
+trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends GraphLike[V, X, E, Graph[V, X, E]] with collection.Set[GraphParam[V, X, E]]
 {
   override def empty: Graph[V, X, E] =
     immutable.Graph.empty

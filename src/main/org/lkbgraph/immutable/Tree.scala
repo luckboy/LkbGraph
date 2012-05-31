@@ -1,7 +1,7 @@
 package org.lkbgraph.immutable
 import org.lkbgraph._
 
-/** A trait for the immutable tree.
+/** A trait for tree.
  * 
  * @author Łukasz Szpakowski
  */

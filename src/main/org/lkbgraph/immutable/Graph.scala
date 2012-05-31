@@ -2,11 +2,11 @@ package org.lkbgraph.immutable
 import scala.collection.immutable.ListMap
 import org.lkbgraph._
 
-/** A trait for the immutable graph.
+/** A trait for immutable graph.
  * 
  * @author Łukasz Szpakowski
  */
-trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.GraphLike[V, X, E, Graph[V, X, E]] with base.Graph[V, X, E]
+trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.GraphLike[V, X, E, Graph[V, X, E]] with base.Graph[V, X, E] with Set[GraphParam[V, X, E]]
 {
   override def empty: Graph[V, X, E] =
     Graph.empty
@@ -15,7 +15,7 @@ trait Graph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.GraphLike[V, X, E
     Graph.newBuilder
 }
 
-/** A singleton for the immutable graph.
+/** A singleton for immutable graph.
  * 
  * @author Łukasz Szpakowski
  */

@@ -1,7 +1,7 @@
 package org.lkbgraph.immutable
 import org.lkbgraph._
 
-/** A trait for the graph representation of the adjacency list.
+/** A trait for the immutable version of the graph representation of the adjacency list.
  * 
  * @author Łukasz Szpakowski
  */
@@ -14,7 +14,7 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
     AdjListGraph.newBuilder
 }
 
-/** A singleton for the graph representation of the adjacency list.
+/** A singleton for the immutable version of the graph representation of the adjacency list.
  * 
  * @author Łukasz Szpakowski
  */
@@ -28,8 +28,13 @@ object AdjListGraph
     
   private class ImplAdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](protected val edgeLists: collection.Map[V, List[E[V, X]]]) extends AdjListGraph[V, X, E]
   {
+    private lazy val params = (vertices.map { Vertex(_) } ++ edges)
+    
     override protected def newAListGraph(es: collection.Map[V, List[E[V, X]]]): AdjListGraph[V, X, E] =
       new ImplAdjListGraph(es)
+    
+    override def iterator: Iterator[GraphParam[V, X, E]] =
+      params.toIterator
   }
   
   /** Creates a new graph from the vertices and / or the edges.

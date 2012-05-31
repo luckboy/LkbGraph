@@ -1,7 +1,7 @@
 package org.lkbgraph.immutable
 import org.lkbgraph._
 
-/** A trait for the path.
+/** A trait for path.
  * 
  * @author Łukasz Szpakowski
  */

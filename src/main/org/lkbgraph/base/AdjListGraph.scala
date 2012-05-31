@@ -12,6 +12,9 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends AdjListGraphLik
     
   override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
     AdjListGraph.newBuilder
+    
+  override def stringPrefix: String =
+    "AdjListGraph"
 }
 
 /** A singleton for the graph representation of the adjacency list.

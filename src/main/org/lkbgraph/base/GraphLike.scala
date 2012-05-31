@@ -112,7 +112,9 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
     }
   
   /** Returns a copy of the graph without the specified vertices or the specified edges.
-   * @param param		the vertices or the edges.
+   * @param param1		the first vertex or the first edge.
+   * @param param2		the second vertices or the second edges.
+   * @param params		the vertices or the edges.
    * @return			a copy of the graph.
    */
   def -!(param1: GraphParam[V, Unweighted, E], param2: GraphParam[V, Unweighted, E], params: GraphParam[V, Unweighted, E]*): G =
