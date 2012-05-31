@@ -41,7 +41,7 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
     if(e._1 != e._2) {
       val newEdgeLists1 = edgeLists + (e.in -> edgeListFromWithEdge(e.in, e))
       val newEdgeLists2 = if(e.isDirected)
-          newEdgeLists1 + (e.out -> Nil)
+          newEdgeLists1 + (e.out -> edgeListFrom(e.out))
         else
           newEdgeLists1 + (e.out -> edgeListFromWithEdge(e.out, e.swap))
       newAListGraph(newEdgeLists2)
