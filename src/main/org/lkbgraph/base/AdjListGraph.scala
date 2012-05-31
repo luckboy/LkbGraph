@@ -1,4 +1,6 @@
 package org.lkbgraph.base
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable.Builder
 import org.lkbgraph._
 
 /** A trait for the graph representation of the adjacency list.
@@ -10,7 +12,7 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends AdjListGraphLik
   override def empty: AdjListGraph[V, X, E] =
     AdjListGraph.empty
     
-  override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
+  override protected[this] def newBuilder: Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
     AdjListGraph.newBuilder
     
   override def stringPrefix: String =
@@ -21,11 +23,14 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends AdjListGraphLik
  * 
  * @author Łukasz Szpakowski
  */
-object AdjListGraph
+object AdjListGraph extends GraphFactory[AdjListGraph]
 {
-  def empty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: AdjListGraph[V, X, E] = 
+  implicit def canBuildFrom[E1[+Y1, +Z1] <: EdgeLike[Y1, Z1, E1], V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: CanBuildFrom[AdjListGraph[_, _, E1], GraphParam[V, X, E], AdjListGraph[V, X, E]] =
+    graphCanBuildFrom
+  
+  override def empty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: AdjListGraph[V, X, E] = 
     immutable.AdjListGraph.empty
-    
-  def newBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z,  E]]: collection.mutable.Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
-    immutable.AdjListGraph.newBuilder
+
+  override def newBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
+    AdjListGraph.newBuilder
 }
