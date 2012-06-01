@@ -94,6 +94,6 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
             }.size)
         }
       }
-    }
+    }    
   }
 }
