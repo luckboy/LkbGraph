@@ -16,8 +16,8 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   /** The vertices. */
   def vertices: Iterable[V]
   
-  /** The vertex iterator. */
-  def vertexIterator: Iterator[V] =
+  /** The iterator of vertices. */
+  def verticesIterator: Iterator[V] =
     vertices.toIterator
 
   /** The edge set. */
@@ -27,8 +27,8 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   /** The edges. */
   def edges: Iterable[E[V, X]]
   
-  /** The edge iterator. */
-  def edgeIterator: Iterator[E[V, X]] =
+  /** The iterator of the edges. */
+  def edgesIterator: Iterator[E[V, X]] =
     edges.toIterator
   
   /** Returns the output vertices of the specified vertex. 
@@ -185,7 +185,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
     }
   
   override def iterator: Iterator[GraphParam[V, X, E]] =
-    (vertices.map { Vertex(_) } ++ edges).toIterator
+    verticesIterator.map { Vertex(_) } ++ edgesIterator
 
   override def + (param: GraphParam[V, X, E]): G =
     (param: @unchecked) match {

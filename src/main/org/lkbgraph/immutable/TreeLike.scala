@@ -15,9 +15,9 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   def nodes: Iterable[V] =
     vertices
 
-  /** The nodes is the synonym of vertexSet. */
-  def nodeIterator: Iterator[V] =
-    vertexIterator
+  /** The nodes is the synonym of verticesIterator. */
+  def nodesIterator: Iterator[V] =
+    verticesIterator
 
   /** The root. */
   def root: V

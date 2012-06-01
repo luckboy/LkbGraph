@@ -15,7 +15,12 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
     edgeLists.keys
     
   override def edges: Iterable[E[V, X]] =
-    edgeLists.values.flatten.toSet
+    edgesIterator.toIterable
+    
+  override def edgesIterator: Iterator[E[V, X]] =
+    edgeLists.iterator.foldLeft(Iterator.empty: Iterator[E[V, X]], Set[V]()) { 
+      case ((iter, vs), (v, es)) => (iter ++ es.iterator.filterNot { e => vs.contains(e.out) }, vs + v)
+    }._1
     
   protected def edgeListFrom(s: V) =
     edgeLists.getOrElse(s, Nil)
