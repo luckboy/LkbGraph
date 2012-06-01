@@ -164,26 +164,18 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   /** Returns weak connected components from the graph. */
   def connectedComponents[G1 >: G]: Set[G1] = throw new Exception
     
-  // TODO toUndirectedGraph method doesn't work because it just returns this object. This method should return a converted graph.
   /** Converts the graph to a undirected graph. */
   def toUndirectedGraph[G1 <: GraphLike[V, X, UndiEdge, _]](implicit bf: CanBuildFrom[G, GraphParam[V, X, UndiEdge], G1]): G1 =
-    repr match {
-      case g: G1 => g
-      case g     => g.map { 
-        case Vertex(v)  => Vertex(v)
-        case e: E[V, X] => e.toUndirectedEdge
-      }
+    map { 
+      case Vertex(v)  => Vertex(v)
+      case e: E[V, X] => e.toUndirectedEdge
     }
   
-  // TODO toUnweightedGraph method doesn't work because it just returns this object. This method should return a converted graph.
   /** Converts the graph a unweighted graph. */
   def toUnweightedGraph[G1 <: GraphLike[V, Unweighted, E, _]](implicit bf: CanBuildFrom[G, GraphParam[V, Unweighted, E], G1]): G1 =
-    repr match {
-      case g: G1 => g
-      case g     => g.map {
-        case Vertex(v)  => Vertex(v)
-        case e: E[V, X] => e.toUnweightedEdge
-      }
+    map {
+      case Vertex(v)  => Vertex(v)
+      case e: E[V, X] => e.toUnweightedEdge
     }
   
   override def contains(param: GraphParam[V, X, E]): Boolean =
