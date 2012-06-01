@@ -1,6 +1,6 @@
 package org.lkbgraph
 
-class UndiEdgeAssoc[V](x: V) 
+class UnwUndiEdgeAssoc[V](x: V) 
 {
   def ~ (y: V) = UnwUndiEdge(x, y)
 }

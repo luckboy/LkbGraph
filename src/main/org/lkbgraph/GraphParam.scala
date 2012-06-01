@@ -146,7 +146,7 @@ case class WDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdge[V, Weighted[
     WUndiEdge(in, out, weight)
 
   override def toString: String =
-    in + " -> " + out + " % " + weight
+    in + " ~> " + out + " % " + weight
 }
 
 /** A class for the undirected edge without weight.
