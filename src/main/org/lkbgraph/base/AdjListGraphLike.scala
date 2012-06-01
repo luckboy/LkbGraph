@@ -9,7 +9,7 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
 {  
   protected def edgeLists: collection.Map[V, List[E[V, X]]]
 
-  protected def newAListGraph(es: collection.Map[V, List[E[V, X]]]): G
+  protected def newAdjListGraph(es: collection.Map[V, List[E[V, X]]]): G
   
   override def vertices: Iterable[V] =
     edgeLists.keys
@@ -18,8 +18,8 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
     edgesIterator.toIterable
     
   override def edgesIterator: Iterator[E[V, X]] =
-    edgeLists.iterator.foldLeft(Iterator.empty: Iterator[E[V, X]], Set[V]()) { 
-      case ((iter, vs), (v, es)) => (iter ++ es.iterator.filterNot { e => vs.contains(e.out) }, vs + v)
+    edgeLists.iterator.foldLeft(Iterator.empty: Iterator[E[V, X]], Set[E[V, X]]()) { 
+      case ((iter, ves), (v, es)) => (iter ++ es.iterator.filterNot { e => ves.contains(e) }, ves ++ es)
     }._1
     
   protected def edgeListFrom(s: V) =
@@ -35,7 +35,7 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
     edgeLists.exists { _._2.contains(e) }
   
   override def +@ (v: V): G =
-    newAListGraph(edgeLists + (v -> Nil))
+    newAdjListGraph(edgeLists + (v -> edgeListFrom(v)))
     
   protected def edgeListFromWithEdge(s: V, e: E[V, X]) = {
     val es = edgeListFrom(s)
@@ -49,12 +49,12 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
           newEdgeLists1 + (e.out -> edgeListFrom(e.out))
         else
           newEdgeLists1 + (e.out -> edgeListFromWithEdge(e.out, e.swap))
-      newAListGraph(newEdgeLists2)
+      newAdjListGraph(newEdgeLists2)
     } else
       repr
       
   override def -@ (v: V): G =
-    newAListGraph(edgeLists.map { case (u, es) => (u, es.filterNot { _.out == v }) } - v)
+    newAdjListGraph(edgeLists.map { case (u, es) => (u, es.filterNot { _.out == v }) } - v)
     
   override def -~! (e: E[V, Unweighted]): G =
     if(e._1 != e._2) {
@@ -63,7 +63,7 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
           newEdgeLists1
         else
           newEdgeLists1 + (e.out -> edgeListFrom(e.out).filterNot { _ ==~ e })
-      newAListGraph(edgeLists)
+      newAdjListGraph(newEdgeLists2)
     } else
       repr
 }

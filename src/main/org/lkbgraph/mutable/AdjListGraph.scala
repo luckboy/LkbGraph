@@ -57,7 +57,7 @@ object AdjListGraph
     
   private class ImplAdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](protected val edgeLists: collection.mutable.Map[V, List[E[V, X]]]) extends AdjListGraph[V, X, E]
   {
-    override protected def newAListGraph(es: collection.Map[V, List[E[V, X]]]): AdjListGraph[V, X, E] =
+    override protected def newAdjListGraph(es: collection.Map[V, List[E[V, X]]]): AdjListGraph[V, X, E] =
       es match {
         case mes: collection.mutable.Map[V, List[E[V, X]]] => new ImplAdjListGraph(mes)
         case _                                             => new ImplAdjListGraph(collection.mutable.Map() ++ es)

@@ -32,7 +32,7 @@ object AdjListGraph extends GraphFactory[AdjListGraph]
   {
     private lazy val params = (vertices.map { Vertex(_) } ++ edges)
     
-    override protected def newAListGraph(es: collection.Map[V, List[E[V, X]]]): AdjListGraph[V, X, E] =
+    override protected def newAdjListGraph(es: collection.Map[V, List[E[V, X]]]): AdjListGraph[V, X, E] =
       new ImplAdjListGraph(es)
     
     override def iterator: Iterator[GraphParam[V, X, E]] =

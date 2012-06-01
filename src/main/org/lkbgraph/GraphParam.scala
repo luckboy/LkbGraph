@@ -182,6 +182,9 @@ case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with Un
       case _                   => false
     }
 
+  override def hashCode: Int =
+    _1.hashCode ^ _2.hashCode
+
   override def toString: String = 
     _1 + " ~ " + _2
 }
@@ -215,6 +218,9 @@ case class WUndiEdge[+V, +W](_1: V, _2: V, weight: W) extends UndiEdge[V, Weight
       case WUndiEdge(v1, v2, w) => ((_1 == v1 && _2 == v2) || (_1 == v2 && _2 == v1)) && weight == w
       case _                    => false
     }
+  
+  override def hashCode: Int =
+    _1.hashCode ^ _2.hashCode ^ weight.hashCode
 
   override def toString: String =
     _1 + " ~ " + _2 + " % " + weight
