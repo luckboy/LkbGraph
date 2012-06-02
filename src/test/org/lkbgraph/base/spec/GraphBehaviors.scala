@@ -1,13 +1,13 @@
 package org.lkbgraph.base.spec
 import org.scalatest.Spec
 import org.scalatest.matchers.ShouldMatchers
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.prop.PropertyChecks
 import org.scalacheck.Gen
 import org.lkbgraph._
 import org.lkbgraph.immutable
 import org.lkbgraph._
 
-trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Graph[XV, XX, XE]] extends GeneratorDrivenPropertyChecks with ShouldMatchers
+trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Graph[XV, XX, XE]] extends PropertyChecks with ShouldMatchers
 {
   this: Spec =>
 
@@ -20,43 +20,45 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
   {
     describe("vertices") {
       it("should return all vertices of the graph") {
-        forAll(genUnwDiGraphParamsAndExpectData) {
-          case (ps, vs, _) => (graphFactory[Char, Unweighted, DiEdge]() ++ ps).vertices.toSet should be === vs
+        forAll(genUnwDiGraphParamData) {
+          case GraphParamData(ps, vs, _) => 
+            (graphFactory[Char, Unweighted, DiEdge]() ++ ps).vertices.toSet should be === vs
         }
       }
       
       it("should have a size that equals to the number of the vertices") {
-        forAll(genUnwDiGraphParamsAndExpectData) {
-          case (ps, vs, _) => (graphFactory[Char, Unweighted, DiEdge]() ++ ps).vertices should have size(vs.size)
+        forAll(genUnwDiGraphParamData) {
+          case GraphParamData(ps, vs, _) => 
+            (graphFactory[Char, Unweighted, DiEdge]() ++ ps).vertices should have size(vs.size)
         }
       }
     }
     
     describe("edges") {
       it("should return all edges of the directed graph") {
-        forAll(genUnwDiGraphParamsAndExpectData) { 
-          case (ps, _, es) => 
+        forAll(genUnwDiGraphParamData) { 
+          case GraphParamData(ps, _, es) => 
             (graphFactory[Char, Unweighted, DiEdge]() ++ ps).edges.toSet should be === es
         }
       }
       
       it("should have a size that equals to the number of the edges for directed graph") {
-        forAll(genUnwDiGraphParamsAndExpectData) { 
-          case (ps, _, es) => 
+        forAll(genUnwDiGraphParamData) { 
+          case GraphParamData(ps, _, es) => 
             (graphFactory[Char, Unweighted, DiEdge]() ++ ps).edges should have size(es.size)
         }
       }
 
       it("should return all edges of the undirected graph") {
-        forAll(genUnwUndiGraphParamsAndExpectData) { 
-          case (ps, _, es) => 
+        forAll(genUnwUndiGraphParamData) { 
+          case GraphParamData(ps, _, es) => 
             (graphFactory[Char, Unweighted, UndiEdge]() ++ ps).edges.toSet should be === es
         }
       }
       
       it("should have a size that equals to the number of the edges for undirected graph") {
-        forAll(genUnwUndiGraphParamsAndExpectData) { 
-          case (ps, _, es) => 
+        forAll(genUnwUndiGraphParamData) { 
+          case GraphParamData(ps, _, es) => 
             (graphFactory[Char, Unweighted, UndiEdge]() ++ ps).edges should have size(es.size)
         }
       }
@@ -64,36 +66,158 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
     
     describe("edgesFrom") {
       it("should return the edges from the start vertex for directed graph") {
-        forAll(for(t <- genUnwDiGraphParamsAndExpectData; s <- Gen.oneOf(t._2.toSeq)) yield (t, s)) {
-          case ((ps, _, es), s) => 
+        forAll(for(t <- genUnwDiGraphParamData; s <- Gen.oneOf(t.vs.toSeq)) yield (t, s)) {
+          case (GraphParamData(ps, _, es), s) => 
             (graphFactory[Char, Unweighted, DiEdge]() ++ ps).edgesFrom(s).toSet should be === es.filter { _.in == s }
         }
       }
       
       it("should have a size that equals to the number of the edges from the start vertex for directed graph") {
-        forAll(for(t <- genUnwDiGraphParamsAndExpectData; s <- Gen.oneOf(t._2.toSeq)) yield (t, s)) {
-          case ((ps, _, es), s) => 
+        forAll(for(t <- genUnwDiGraphParamData; s <- Gen.oneOf(t.vs.toSeq)) yield (t, s)) {
+          case (GraphParamData(ps, _, es), s) => 
             (graphFactory[Char, Unweighted, DiEdge]() ++ ps).edgesFrom(s) should have size(es.filter { _.in == s }.size)
         }        
       }
       
       it("should return the edges from the start vertex for undirected graph") {
-        forAll(for(t <- genUnwUndiGraphParamsAndExpectData; s <- Gen.oneOf(t._2.toSeq)) yield (t, s)) {
-          case ((ps, _, es), s) => 
+        forAll(for(t <- genUnwUndiGraphParamData; s <- Gen.oneOf(t.vs.toSeq)) yield (t, s)) {
+          case (GraphParamData(ps, _, es), s) => 
             (graphFactory[Char, Unweighted, UndiEdge]() ++ ps).edgesFrom(s).toSet should be === es.filter { 
-              e => e._1 == s  || e._2 == s 
+              e => e._1 == s || e._2 == s 
             }
         }
       }
 
       it("should have a size that equals to the number of the edges from the start vertex for undirected graph") {
-        forAll(for(t <- genUnwUndiGraphParamsAndExpectData; s <- Gen.oneOf(t._2.toSeq)) yield (t, s)) {
-          case ((ps, _, es), s) => 
+        forAll(for(t <- genUnwUndiGraphParamData; s <- Gen.oneOf(t.vs.toSeq)) yield (t, s)) {
+          case (GraphParamData(ps, _, es), s) => 
             (graphFactory[Char, Unweighted, UndiEdge]() ++ ps).edgesFrom(s).toSet should have size(es.filter { 
-              e => e._1 == s  || e._2 == s 
+              e => e._1 == s || e._2 == s 
             }.size)
         }
       }
     }    
+    
+    describe("+@") {
+      it("should return a copy of the graph with a new vertex for a non-exists vertex") {
+    	forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
+    	  case (vs, v) => 
+    	    val ps = (vs - v).map(V[Char])
+    	    val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
+    	    val g2 = g +@ v
+    	    g2.vertices.toSet should be === vs
+    	    g2.vertices should have size(vs.size)
+    	}
+      }
+      
+      it("should return a graph with the unmodified vertex set for the vertex at the graph") {
+    	forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
+    	  case (vs, v) => 
+    	    val ps = vs.map(V[Char])
+            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
+    	    val g2 = g +@ v
+    	    g2.vertices.toSet should be === vs
+    	    g2.vertices should have size(vs.size)
+    	}
+      }
+    }
+    
+    val genGrapParamDataWithoutEdgeAndVertices = for {
+      vs <- genVertices; us <- Gen.pick(2, vs); es <- genUnwDiEdges(vs -- us)
+    } yield {
+      val Seq(v, u) = us
+      val vs2 = vs -- us
+      (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), v ~> u) 
+    }
+
+    describe("+~") {
+      it("should return a graph with a modified vertice set and a modified edge set for a new edge that vertices isn't exists") {
+        forAll(genGrapParamDataWithoutEdgeAndVertices) {
+          case (GraphParamData(ps, vs, es), e) =>
+            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
+            val g2 = g +~ e
+            g2.vertices.toSet should be === ((vs + e._1) + e._2)
+            g2.vertices should have size(vs.size + 2)
+            g2.edges.toSet should be === (es + e)
+            g2.edges should have size(es.size + 1)
+        }
+      }
+
+      it("should return a graph with a modified edge set for a new edge that vertices set is exists") {
+        forAll(for(t <- genUnwDiGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
+          case (GraphParamData(ps, vs, es), e) =>
+            val g = graphFactory[Char, Unweighted, DiEdge]() ++ (ps - e)
+            val g2 = g +~ e
+            g2.vertices.toSet should be === vs
+            g2.vertices should have size(vs.size)
+            g2.edges.toSet should be === es
+            g2.edges should have size(es.size)
+        }
+      }
+
+      it("should return a graph with the unmodified edge set for the edge in the graph") {
+        forAll(for(t <- genUnwDiGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
+          case (GraphParamData(ps, vs, es), e) =>
+            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
+            val g2 = g +~ e
+            g2.vertices.toSet should be === vs
+            g2.vertices should have size(vs.size)
+            g2.edges.toSet should be === es
+            g2.edges should have size(es.size)
+        }
+      }      
+    }
+
+    describe("-@") {
+      it("should return a copy of the graph without the vertex that didn't be in the graph") {
+    	forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
+    	  case (vs, v) => 
+    	    val ps = (vs - v).map(V[Char])
+    	    val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
+    	    val g2 = g -@ v
+    	    g2.vertices.toSet should be === (vs - v)
+    	    g2.vertices should have size(vs.size - 1)
+    	}
+      }
+      
+      it("should return a copy of the graph wihout the vertex that been in the graph") {
+        forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
+          case (vs, v) =>
+            val ps = vs.map(V[Char])
+            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
+            val g2 = g -@ v
+            g2.vertices.toSet should be === (vs - v)
+            g2.vertices should have size(vs.size - 1)
+        }
+      }
+      
+      it("should return a copy of the graph without the edges which are connected to the removed vertex") {
+        forAll(for { 
+            vs <- genVertices
+            v <- Gen.oneOf(vs.toSeq)
+            es <- genUnwDiEdges(vs - v)
+            us <- Gen.someOf(vs - v) 
+          } yield { 
+            val vs2 = vs - v
+            (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), (v, us.map { UnwDiEdge[Char](v, _) }.toSet))
+          }) {
+          case (GraphParamData(ps, vs, es), (v, es2)) =>
+            val ps2 = ps + V(v) ++ es2
+            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps2
+            val g2 = g -@ v
+            //println(ps, vs, es, v, es2)
+            //println(g)
+            //println(g2)
+            g2.vertices.toSet should be === (vs - v)
+            g2.vertices should have size(vs.size)
+            g2.edges.toSet should be === es 
+            g2.edges should have size(es.size)
+        }
+      }
+    }
+
+    describe("-~!") {
+      
+    }
   }
 }

@@ -5,6 +5,8 @@ package org
  */
 package object lkbgraph 
 {
+  val V = Vertex
+  
   implicit def tuple2ToDiEdge[V](x: (V, V)) =
     new UnwDiEdge(x._1, x._2)
 

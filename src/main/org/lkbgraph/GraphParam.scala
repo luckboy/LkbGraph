@@ -89,6 +89,10 @@ sealed trait UnwEdgeToWEdge[+V, +WE[+_, +_]]
  * @author Łukasz Szpakowski
  */
 case class Vertex[+V](value: V) extends GraphParam[V, Nothing, Nothing]
+{
+  override def toString: String =
+    "V(" + value + ")"
+}
 
 /** A class for the directed edge without weight.
  * 
