@@ -265,7 +265,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
           forAll(genGraphParamDataWithoutEdgeAndVertices) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ ps
-              val g2 = g -~ e
+              val g2 = g -~! e.toUnweightedEdge
               g2.vertices.toSet should be === vs
               g2.vertices should have size(vs.size)
               g2.edges.toSet should be === (es)
@@ -277,7 +277,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
           forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ (ps - e)
-              val g2 = g -~ e
+              val g2 = g -~! e.toUnweightedEdge
               g2.vertices.toSet should be === vs
               g2.vertices should have size(vs.size)
               g2.edges.toSet should be === (es - e)
@@ -289,7 +289,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
           forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ ps
-              val g2 = g -~ e
+              val g2 = g -~! e.toUnweightedEdge
               g2.vertices.toSet should be === vs
               g2.vertices should have size(vs.size)
               g2.edges.toSet should be === (es - e)
