@@ -58,11 +58,15 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
     
   override def -~! (e: E[V, Unweighted]): G =
     if(e._1 != e._2) {
-      val newEdgeLists1 = edgeLists + (e.in -> edgeListFrom(e.in).filterNot { _ ==~ e } )
+      val newEdgeLists1 = edgeLists.get(e.in).map { 
+        es => edgeLists + (e.in -> es.filterNot { _ ==~ e } ) 
+      }.getOrElse(edgeLists)
       val newEdgeLists2 = if(e.isDirected)
           newEdgeLists1
         else
-          newEdgeLists1 + (e.out -> edgeListFrom(e.out).filterNot { _ ==~ e })
+          edgeLists.get(e.out).map {
+            es => newEdgeLists1 + (e.out -> es.filterNot { _ ==~ e })
+          }.getOrElse(newEdgeLists1)
       newAdjListGraph(newEdgeLists2)
     } else
       repr
