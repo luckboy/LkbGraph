@@ -12,18 +12,18 @@ object GraphParamGen
   object GraphGen
   {
     def genUnwDiEdges(vs: Set[Char]) = 
-      Gen.containerOf[Set, UnwDiEdge[Char]](Gen.pick(2, vs).map { case Seq(v, u) => UnwDiEdge[Char](v, u) })
+      Gen.containerOf[Set, DiEdge[Char, Unweighted]](Gen.pick(2, vs).map { case Seq(v, u) => UnwDiEdge[Char](v, u) })
 
     def genUnwUndiEdges(vs: Set[Char]) = 
-      Gen.containerOf[Set, UnwUndiEdge[Char]](Gen.pick(2, vs).map { case Seq(v, u) => UnwUndiEdge[Char](v, u) })
+      Gen.containerOf[Set, UndiEdge[Char, Unweighted]](Gen.pick(2, vs).map { case Seq(v, u) => UnwUndiEdge[Char](v, u) })
   
     def genWDiEdges(vs: Set[Char]) = 
-      Gen.containerOf[Set, WDiEdge[Char, Int]](Gen.pick(2, vs).map2(arbitrary[Int]) { 
+      Gen.containerOf[Set, DiEdge[Char, Weighted[Int]]](Gen.pick(2, vs).map2(arbitrary[Int]) { 
         case (Seq(v, u), w) => WDiEdge[Char, Int](v, u, w) 
       }).map { es => es.map { e => (e.toUnweightedEdge, e) }.toMap.values.toSet }
   
     def genWUndiEdges(vs: Set[Char]) = 
-      Gen.containerOf[Set, WUndiEdge[Char, Int]](Gen.pick(2, vs).map2(arbitrary[Int]) { 
+      Gen.containerOf[Set, UndiEdge[Char, Weighted[Int]]](Gen.pick(2, vs).map2(arbitrary[Int]) { 
         case (Seq(v, u), w) => WUndiEdge[Char, Int](v, u, w) 
       }).map { es => es.map { e => (e.toUnweightedEdge, e) }.toMap.values.toSet }
   
@@ -40,7 +40,7 @@ object GraphParamGen
     }
   
     val genUnwUndiGraphParamData = for(vs <- genVertices; es <- genUnwUndiEdges(vs)) yield { 
-      GraphParamData(vs.map(Vertex[Char]) ++ es, vs, es) 
+      GraphParamData[GraphParam[Char, Unweighted, UndiEdge], Char, UndiEdge[Char, Unweighted]](vs.map(Vertex[Char]) ++ es, vs, es) 
     }
 
     val genWDiGraphParamData = for(vs <- genVertices; es <- genWDiEdges(vs)) yield { 

@@ -4,7 +4,7 @@ package org.lkbgraph
  * 
  * @author Łukasz Szpakowski
  */
-sealed trait GraphParam[+V, +X, +E[+_, +_]]
+sealed trait GraphParam[+V, +X, +E[+_, +_]] extends Product
 
 /** A template trait for the edge.
  * 

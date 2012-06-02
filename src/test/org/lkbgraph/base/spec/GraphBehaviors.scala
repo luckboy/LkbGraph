@@ -122,54 +122,95 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
       }
     }
     
-    val genGrapParamDataWithoutEdgeAndVertices = for {
-      vs <- genVertices; us <- Gen.pick(2, vs); es <- genUnwDiEdges(vs -- us)
-    } yield {
-      val Seq(v, u) = us
-      val vs2 = vs -- us
-      (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), v ~> u) 
+    trait AddSubGens[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]
+    {
+      def graphPrefix: String
+      
+      def makeEdge(v: Char, u: Char): E[Char, X]
+      
+      def genGraphParamDataWithoutEdgeAndVertices: Gen[(GraphParamData[GraphParam[Char, X, E], Char, E[Char, X]], E[Char, X])] =
+        for {
+          vs <- genVertices; us <- Gen.pick(2, vs); es <- genEdges(vs -- us)
+        } yield {
+          val Seq(v, u) = us
+          val vs2 = vs -- us
+          (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), makeEdge(v, u)) 
+        }
+        
+      def genGraphParamData: Gen[GraphParamData[GraphParam[Char, X, E], Char, E[Char, X]]]
+      
+      def genEdges(vs: Set[Char]): Gen[Set[E[Char, X]]]
+    }
+    
+    implicit object UnwDiAddSubGens extends AddSubGens[Unweighted, DiEdge]
+    {
+      override def graphPrefix: String = "directed"
+
+      override def makeEdge(v: Char, u: Char) = v ~> u
+      
+      override def genGraphParamData = genUnwDiGraphParamData
+      
+      override def genEdges(vs: Set[Char]) = genUnwDiEdges(vs)
+    }
+
+    implicit object UnwUndiAddSubGens extends AddSubGens[Unweighted, UndiEdge]
+    {
+      override def graphPrefix: String = "undirected"
+
+      override def makeEdge(v: Char, u: Char) = v ~ u
+      
+      override def genGraphParamData = genUnwUndiGraphParamData
+      
+      override def genEdges(vs: Set[Char]) = genUnwUndiEdges(vs)
     }
 
     describe("+~") {
-      it("should return a graph with a modified vertice set and a modified edge set for a new edge that vertices isn't exists") {
-        forAll(genGrapParamDataWithoutEdgeAndVertices) {
-          case (GraphParamData(ps, vs, es), e) =>
-            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
-            val g2 = g +~ e
-            g2.vertices.toSet should be === ((vs + e._1) + e._2)
-            g2.vertices should have size(vs.size + 2)
-            g2.edges.toSet should be === (es + e)
-            g2.edges should have size(es.size + 1)
+      def addable[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: AddSubGens[X, E]) = {
+        import gens._
+        
+        it("should return a " + graphPrefix + " graph with a modified vertice set and a modified edge set for a new edge that vertices isn't exists") {
+          forAll(genGraphParamDataWithoutEdgeAndVertices) {
+            case (GraphParamData(ps, vs, es), e) =>
+              val g = graphFactory[Char, X, E]() ++ ps
+              val g2 = g +~ e
+              g2.vertices.toSet should be === ((vs + e._1) + e._2)
+              g2.vertices should have size(vs.size + 2)
+              g2.edges.toSet should be === (es + e)
+              g2.edges should have size(es.size + 1)
+          }
         }
-      }
 
-      it("should return a graph with a modified edge set for a new edge that vertices set is exists") {
-        forAll(for(t <- genUnwDiGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
-          case (GraphParamData(ps, vs, es), e) =>
-            val g = graphFactory[Char, Unweighted, DiEdge]() ++ (ps - e)
-            val g2 = g +~ e
-            g2.vertices.toSet should be === vs
-            g2.vertices should have size(vs.size)
-            g2.edges.toSet should be === es
-            g2.edges should have size(es.size)
+        it("should return a " +graphPrefix + " graph with a modified edge set for a new edge that vertices set is exists") {
+          forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
+            case (GraphParamData(ps, vs, es), e) =>
+              val g = graphFactory[Char, X, E]() ++ (ps - e)
+              val g2 = g +~ e
+              g2.vertices.toSet should be === vs
+              g2.vertices should have size(vs.size)
+              g2.edges.toSet should be === es
+              g2.edges should have size(es.size)
+          }
         }
-      }
 
-      it("should return a graph with the unmodified edge set for the edge in the graph") {
-        forAll(for(t <- genUnwDiGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
-          case (GraphParamData(ps, vs, es), e) =>
-            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
-            val g2 = g +~ e
-            g2.vertices.toSet should be === vs
-            g2.vertices should have size(vs.size)
-            g2.edges.toSet should be === es
-            g2.edges should have size(es.size)
-        }
-      }      
+        it("should return a " +graphPrefix + "graph with the unmodified edge set for the edge in the graph") {
+          forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
+            case (GraphParamData(ps, vs, es), e) =>
+              val g = graphFactory[Char, X, E]() ++ ps
+              val g2 = g +~ e
+              g2.vertices.toSet should be === vs
+              g2.vertices should have size(vs.size)
+              g2.edges.toSet should be === es
+              g2.edges should have size(es.size)
+          }
+        }         
+      }
+      
+      it should behave like addable[Unweighted, DiEdge]
+      it should behave like addable[Unweighted, UndiEdge]
     }
 
     describe("-@") {
-      it("should return a copy of the graph with unmodified vertices for a mon-existent vertex") {
+      it("should return a copy of the graph with unmodified vertices for a non-existent vertex") {
     	forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
     	  case (vs, v) => 
     	    val ps = (vs - v).map(V[Char])
@@ -217,41 +258,49 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
     }
 
     describe("-~!") {
-      it("should return a copy of the graph with the unmodified edge set and the unmodified vertex set for a non-existent edge") {
-        forAll(genGrapParamDataWithoutEdgeAndVertices) {
-          case (GraphParamData(ps, vs, es), e) =>
-            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
-            val g2 = g -~ e
-            g2.vertices.toSet should be === vs
-            g2.vertices should have size(vs.size)
-            g2.edges.toSet should be === (es)
-            g2.edges should have size(es.size)
+      def substrctable[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: AddSubGens[X, E]) = {
+        import gens._
+        
+        it("should return a copy of the " + graphPrefix + " graph with the unmodified edge set and the unmodified vertex set for a non-existent edge") {
+          forAll(genGraphParamDataWithoutEdgeAndVertices) {
+            case (GraphParamData(ps, vs, es), e) =>
+              val g = graphFactory[Char, X, E]() ++ ps
+              val g2 = g -~ e
+              g2.vertices.toSet should be === vs
+              g2.vertices should have size(vs.size)
+              g2.edges.toSet should be === (es)
+              g2.edges should have size(es.size)
+          }
         }
-      }
       
-      it("should return a copy of the graph with unmodified edge set and the umodified vertex set for a non-existent edge that has vertices in the graph") {
-        forAll(for(t <- genUnwDiGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
-          case (GraphParamData(ps, vs, es), e) =>
-            val g = graphFactory[Char, Unweighted, DiEdge]() ++ (ps - e)
-            val g2 = g -~ e
-            g2.vertices.toSet should be === vs
-            g2.vertices should have size(vs.size)
-            g2.edges.toSet should be === (es - e)
-            g2.edges should have size(es.size - 1)
+        it("should return a copy of the " + graphPrefix + " graph with unmodified edge set and the umodified vertex set for a non-existent edge that has vertices in the graph") {
+          forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
+            case (GraphParamData(ps, vs, es), e) =>
+              val g = graphFactory[Char, X, E]() ++ (ps - e)
+              val g2 = g -~ e
+              g2.vertices.toSet should be === vs
+              g2.vertices should have size(vs.size)
+              g2.edges.toSet should be === (es - e)
+              g2.edges should have size(es.size - 1)
+          }
+        }
+
+        it("should return a copy of the " + graphPrefix +" graph without the edge for the edge is exists") {
+          forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
+            case (GraphParamData(ps, vs, es), e) =>
+              val g = graphFactory[Char, X, E]() ++ ps
+              val g2 = g -~ e
+              g2.vertices.toSet should be === vs
+              g2.vertices should have size(vs.size)
+              g2.edges.toSet should be === (es - e)
+              g2.edges should have size(es.size - 1)
+          }
         }
       }
 
-      it("should return a copy of the graph without the edge for the edge is exists") {
-        forAll(for(t <- genUnwDiGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
-          case (GraphParamData(ps, vs, es), e) =>
-            val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps
-            val g2 = g -~ e
-            g2.vertices.toSet should be === vs
-            g2.vertices should have size(vs.size)
-            g2.edges.toSet should be === (es - e)
-            g2.edges should have size(es.size - 1)
-        }
-      }
+      it should behave like substrctable[Unweighted, DiEdge]
+
+      it should behave like substrctable[Unweighted, UndiEdge]
     }
   }
 }
