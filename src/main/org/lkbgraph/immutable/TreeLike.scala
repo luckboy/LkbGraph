@@ -42,6 +42,20 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    */
   def childrenFrom(s: V): Set[V]
 
+  /** Returns a copy of the tree with the specified edge if either of two edge vertices is exists at the tree. In case 
+   * the edge is directed, the input vertex of the edge should be in the tree and the output vertex shouldn't to be at 
+   * the tree. If the following condition isn't satisfied, the edge don't add to a copy of the tree.
+   * @param e			the edge.
+   * @return 			a copy of the tree with the specified edge.
+   */
+  def +~^ (e: E[V, X]): T
+
+  /** Returns a copy of the tree without the branch that from the specified node.
+   * @param s			the node.
+   * @return			a copy of the tree without the branch.
+   */
+  def -@^ (s: V): T  
+  
   /** The pre-order traversal sequence. */
   def preOrder: Seq[V] =
     preOrderFrom(root)
