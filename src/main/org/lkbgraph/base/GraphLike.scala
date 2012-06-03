@@ -21,7 +21,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
     vertices.toIterator
 
   /** The edge set. */
-  def edgeSet: Iterable[E[V, X]] =
+  def edgeSet: Set[E[V, X]] =
     edges.toSet
 
   /** The edges. */
@@ -63,13 +63,15 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
    * @param v			the vertex.
    * @return			the true if the graph contains the vertex, false otherwise.
    */
-  def containsVertex(v: V): Boolean
+  def containsVertex(v: V): Boolean =
+    vertexSet.contains(v)
   
   /** Tests whether the graph contains the specified edge.
    * @param v			the edge.
    * @return			the true if the graph contains the edge, false otherwise.
    */
-  def containsEdge(e: E[V, X]): Boolean
+  def containsEdge(e: E[V, X]): Boolean =
+    edgeSet.contains(e)
   
   /** Returns a copy of the graph with a new vertex.
    * @param v			a new vertex.

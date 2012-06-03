@@ -32,5 +32,5 @@ object AdjListGraph extends GraphFactory[AdjListGraph]
     immutable.AdjListGraph.empty
 
   override def newBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
-    AdjListGraph.newBuilder
+    immutable.AdjListGraph.newBuilder
 }
