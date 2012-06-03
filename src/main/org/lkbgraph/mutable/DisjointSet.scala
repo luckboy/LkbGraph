@@ -5,7 +5,7 @@ import scala.annotation.tailrec
  * 
  * @author Łukasz Szpakowski
  */
-class DisjointSet[T](val value: T) extends DisjointSet.OptNode[T]
+class DisjointSet[T](val nodeValue: T) extends DisjointSet.OptNode[T]
 { 
   import DisjointSet._
   
@@ -65,10 +65,10 @@ class DisjointSet[T](val value: T) extends DisjointSet.OptNode[T]
     }
   
   override def hashCode: Int =
-    find(this).value.hashCode
+    find(this).nodeValue.hashCode
   
   override def toString: String =
-    "DisjointSet(" + value + ",...)"
+    "DisjointSet(" + nodeValue + ",...)"
 }
 
 /** A singleton for the implementation of the disjoint set.
