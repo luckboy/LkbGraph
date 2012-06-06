@@ -30,17 +30,28 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @param s			the start node.
    * @return			the branches.
    */
-  def branchesFrom(s: V): Set[Tree[V, X, E]]
+  def branchesFrom(s: V): Set[Tree[V, X, E]] = throw new Exception
 
   /** The children from the root. */
-  def children: Set[V] =
+  def children: Iterable[V] =
     childrenFrom(root)
     
   /** The children from the specified node. 
    * @param s			the start node.
    * @return			the children.
    */
-  def childrenFrom(s: V): Set[V]
+  def childrenFrom(s: V): Iterable[V] =
+    childEdgesFrom(s).map { _.out }
+  
+  /** The child edges from the root. */
+  def childEdges: Iterable[E[V, X]] =
+    childEdgesFrom(root)
+  
+  /** The child edges the specified node. 
+   * @param s			the start node.
+   * @return			the child edges.
+   */
+  def childEdgesFrom(s: V): Iterable[E[V, X]]
 
   /** Returns a copy of the tree with the specified edge if either of two edge vertices is exists at the tree. In case 
    * the edge is directed, the input vertex of the edge should be in the tree and the output vertex shouldn't to be at 
@@ -85,4 +96,7 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @return			a sequence.
    */
   def levelOrderFrom(s: V): Seq[V] = throw new Exception
+  
+  override def edgesFrom(s: V): Iterable[E[V, X]] =
+    childEdgesFrom(s) ++ edges.filter { _.out == s }
 }
