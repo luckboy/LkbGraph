@@ -99,4 +99,10 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   
   override def edgesFrom(s: V): Iterable[E[V, X]] =
     childEdgesFrom(s) ++ (if(hasUndirectedEdges) edges.filter { _.out == s } else Nil)
+    
+  override def toString: String =
+    stringPrefix + "(" + root + "," + edges.mkString(",") + ")"
+
+  override def stringPrefix: String =
+    "Tree"
 }
