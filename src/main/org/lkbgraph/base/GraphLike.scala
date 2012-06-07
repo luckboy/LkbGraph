@@ -179,6 +179,22 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
       case Vertex(v)  => Vertex(v)
       case e: E[V, X] => e.toUnweightedEdge
     }
+
+  /** Returns true if this graph has the directed edges, false otherwise. */
+  def hasDirectedEdges: Boolean =
+    edgesIterator.take(1).toIterable.headOption.map { _.isDirected }.getOrElse(false)
+    
+  /** Returns true if this graph has the undirected edges, false otherwise. */
+  def hasUndirectedEdges: Boolean =
+    edgesIterator.take(1).toIterable.headOption.map { !_.isDirected }.getOrElse(false)
+
+  /** Returns true if this graph has the weighted edges, false otherwise. */
+  def hasWeightedEdges: Boolean =
+    edgesIterator.take(1).toIterable.headOption.map { _.hasWeight }.getOrElse(false)
+
+  /** Returns true if this graph has the unweighted edges, false otherwise. */
+  def hasUnweightedEdges: Boolean =
+    edgesIterator.take(1).toIterable.headOption.map { !_.hasWeight }.getOrElse(false)
   
   override def contains(param: GraphParam[V, X, E]): Boolean =
     (param: @unchecked) match {

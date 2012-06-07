@@ -24,9 +24,7 @@ object Tree
       edgesIterator.toIterable
       
     override def edgesIterator: Iterator[E[V, X]] =
-      mChildEdgeLists.foldLeft(Iterator.empty: Iterator[E[V, X]], Set[E[V, X]]()) { 
-        case ((iter, set), (v, es)) => (iter ++ es.filterNot { set.contains(_) }, set ++ es)
-      }._1
+      mChildEdgeLists.toIterator.flatMap { _._2 }
 
     private def childEdgeListFrom(s: V): List[E[V, X]] =
       mChildEdgeLists.getOrElse(s, Nil)      
@@ -90,7 +88,7 @@ object Tree
    * @return			a new tree.
    */
   def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: V, es: E[V, X]*): Tree[V, X, E] =
-    (1 to es.length).foldLeft(new ImplTree(root, Map[V, List[E[V, X]]]()): Tree[V, X, E], es.toSet) { 
+    (1 to es.length).foldLeft(new ImplTree(root, Map()): Tree[V, X, E], es.toSet) { 
       case((tree, es), _) => es.find { e => tree.containsVertex(e.in) }.map { e => (tree +~^ e, es - e) }.getOrElse(tree, es)
     }._1
 }

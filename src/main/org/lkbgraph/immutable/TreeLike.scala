@@ -98,5 +98,5 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   def levelOrderFrom(s: V): Seq[V] = throw new Exception
   
   override def edgesFrom(s: V): Iterable[E[V, X]] =
-    childEdgesFrom(s) ++ edges.filter { _.out == s }
+    childEdgesFrom(s) ++ (if(hasUndirectedEdges) edges.filter { _.out == s } else Nil)
 }
