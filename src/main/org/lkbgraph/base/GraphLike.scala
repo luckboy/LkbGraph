@@ -14,6 +14,11 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   def newGraphBuilder: Builder[GraphParam[V, X, E], G] =
     newBuilder
   
+  
+  /** The REPR for graph. */
+  def graphRepr: G =
+    repr
+    
   /** The vertex set. */
   def vertexSet: Set[V] =
     vertices.toSet

@@ -1,5 +1,4 @@
 package org.lkbgraph.mutable
-import scala.annotation.tailrec
 import scala.collection.mutable.Builder
 import org.lkbgraph._
 import org.lkbgraph.immutable._
@@ -8,9 +7,9 @@ import org.lkbgraph.immutable._
  * 
  * @author Łukasz Szpakowski
  */
-class TreeBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], T <: Tree[V, X, E] with TreeLike[V, X, E, _, T]](empty: T) extends Builder[E[V, X], T]
+class PathBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], P <: Path[V, X, E] with PathLike[V, X, E, _, _, P]](empty: P) extends Builder[E[V, X], P]
 {
-  private val mEdges = collection.mutable.Map[V, E[V, X]]()
+  private var mEdges = collection.mutable.Map[V, E[V, X]]()
   
   override def += (elem: E[V, X]): this.type = {
     mEdges += (elem.in -> elem)
@@ -20,10 +19,9 @@ class TreeBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], T <: Tree[V, X, E] with 
 	
   override def clear(): Unit =
     mEdges.clear()  
-    
-  override def result(): T =
+
+  override def result(): P =
     (1 to mEdges.size).foldLeft(empty, mEdges.clone()) {
-      case ((t, es), _) => 
-        t.nodes.find { v => es.contains(v) }.flatMap { v => es.get(v).map { e => (t +~^ e, es -= v) } }.getOrElse(t, es)
+      case ((p, es), _) => p.nodeSeq.lastOption.flatMap { v => es.get(v).map { e => (p +~/ e, es -= v) } }.getOrElse(p, es)
     }._1
 }

@@ -8,11 +8,15 @@ import org.lkbgraph._
  */
 trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, E, G] with Graph[V, X, E], +T <: TreeLike[V, X, E, G, T] with Tree[V, X, E]] extends base.GraphLike[V, X, E, G]
 {
-  /** Creates a tree builder for graph.
+  /** Creates a new builder for tree.
    * @param	root		the root.
-   * @return			a new builder for graph.
+   * @return			a new builder for tree.
    */
   def newTreeBuilder(root: V): Builder[E[V, X], T]
+  
+  /** The REPR for tree. */
+  def treeRepr: T =
+    asInstanceOf[T]
   
   /** The nodes is the synonym of vertexSet. */
   def nodeSet: Iterable[V] =
@@ -106,6 +110,30 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   
   override def edgesFrom(s: V): Iterable[E[V, X]] =
     childEdgesFrom(s) ++ (if(hasUndirectedEdges) edges.filter { _.out == s } else Nil)
+    
+  override def +@ (v: V): G =
+    repr + Vertex(v)
+      
+  override def +~ (e: E[V, X]): G =
+    repr + e
+      
+  override def -@ (v: V): G =
+    repr - Vertex(v)
+      
+  override def -~ (e: E[V, X]): G =
+    repr - e
+      
+  override def -~! (e: E[V, Unweighted]): G =
+    repr -! e
+      
+  override def + (param: GraphParam[V, X, E]): G =
+    (newBuilder ++= this).result + param
+      
+  override def - (param: GraphParam[V, X, E]): G =
+    (newBuilder ++= this).result - param
+      
+  override def -! (param: GraphParam[V, Unweighted, E]): G =
+    (newBuilder ++= this).result -! param
     
   override def toString: String =
     stringPrefix + "(" + root + "," + edges.mkString(",") + ")"

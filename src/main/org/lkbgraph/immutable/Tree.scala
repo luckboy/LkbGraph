@@ -49,7 +49,7 @@ object Tree extends TreeFactory[Tree]
     override def +~^ (e: E[V, X]): Tree[V, X, E] = {
       val e2 = if(!e.isDirected && !containsVertex(e.in)) e.swap else e
       if(containsVertex(e2.out) && !containsVertex(e2.out))
-        new ImplTree(root, mChildEdgeLists + (e2.in -> childEdgeListFromWithEdge(e2.in, e2)))
+        new ImplTree(root, mChildEdgeLists + (e2.in -> childEdgeListFromWithEdge(e2.in, e2)) + (e2.out -> Nil))
       else
         new ImplTree(root, mChildEdgeLists)
     }
@@ -63,31 +63,7 @@ object Tree extends TreeFactory[Tree]
     
     override def -@^ (s: V): Tree[V, X, E] = {
       val ls = if(containsVertex(s)) mChildEdgeLists -- verticesQueue(Queue(s), Set()) else mChildEdgeLists
-      new ImplTree(root, if(ls.isEmpty) Map[V, List[E[V, X]]](root -> Nil) else ls)
+      new ImplTree(root, ls + (s -> Nil))
     }
-    
-    override def +@ (v: V): Graph[V, X, E] =
-      this + Vertex(v)
-      
-    override def +~ (e: E[V, X]): Graph[V, X, E] =
-      this + e
-      
-    override def -@ (v: V): Graph[V, X, E] =
-      this - Vertex(v)
-      
-    override def -~ (e: E[V, X]): Graph[V, X, E] =
-      this - e
-      
-    override def -~! (e: E[V, Unweighted]): Graph[V, X, E] =
-      this -! e
-      
-    override def + (param: GraphParam[V, X, E]): Graph[V, X, E] =
-      (newBuilder ++= this).result + param
-      
-    override def - (param: GraphParam[V, X, E]): Graph[V, X, E] =
-      (newBuilder ++= this).result - param
-      
-    override def -! (param: GraphParam[V, Unweighted, E]): Graph[V, X, E] =
-      (newBuilder ++= this).result -! param
   }
 }
