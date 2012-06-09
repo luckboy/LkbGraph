@@ -1,4 +1,5 @@
 package org.lkbgraph.immutable
+import scala.collection.mutable.Builder
 import org.lkbgraph._
 
 /** A template trait for immutable tree.
@@ -7,6 +8,12 @@ import org.lkbgraph._
  */
 trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, E, G] with Graph[V, X, E], +T <: TreeLike[V, X, E, G, T] with Tree[V, X, E]] extends base.GraphLike[V, X, E, G]
 {
+  /** Creates a tree builder for graph.
+   * @param	root		the root.
+   * @return			a new builder for graph.
+   */
+  def newTreeBuilder(root: V): Builder[E[V, X], T]
+  
   /** The nodes is the synonym of vertexSet. */
   def nodeSet: Iterable[V] =
     vertexSet
@@ -23,14 +30,14 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   def root: V
 
   /** The branches from the root. */
-  def branches: Set[Tree[V, X, E]] =
+  def branches: Iterable[Tree[V, X, E]] =
     branchesFrom(root)
     
   /** The branches from the specified node. 
    * @param s			the start node.
    * @return			the branches.
    */
-  def branchesFrom(s: V): Set[Tree[V, X, E]] = throw new Exception
+  def branchesFrom(s: V): Iterable[Tree[V, X, E]] = throw new Exception
 
   /** The children from the root. */
   def children: Iterable[V] =

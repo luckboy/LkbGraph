@@ -1,6 +1,7 @@
 package org.lkbgraph.base
 import scala.collection.GenTraversableOnce
 import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable.Builder
 import org.lkbgraph._
 
 /** A template trait for the graph.
@@ -9,6 +10,10 @@ import org.lkbgraph._
  */
 trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G] with Graph[V, X, E]] extends collection.SetLike[GraphParam[V, X, E], G]
 {  
+  /** Creates a new builder for graph. */
+  def newGraphBuilder: Builder[GraphParam[V, X, E], G] =
+    newBuilder
+  
   /** The vertex set. */
   def vertexSet: Set[V] =
     vertices.toSet

@@ -33,6 +33,10 @@ sealed trait EdgeLike[+V, +X, E[+_, +_]] extends GraphParam[V, X, E] with Produc
   
   def !=~ [V1 >: V](e: E[V1, _]): Boolean =
     !(this ==~ e)
+    
+  def sameIn[V1 >: V](v: V1): Boolean
+  
+  def sameOut[V1 >: V](v: V1): Boolean
 }
 
 /** A trait for the directed edge.
@@ -46,6 +50,12 @@ sealed trait DiEdge[+V, +X] extends EdgeLike[V, X, DiEdge]
  
   override def ==~ [V1 >: V](e: DiEdge[V1, _]): Boolean =
     in == e.in && out == e.out    
+    
+  override def sameIn[V1 >: V](v: V1): Boolean =
+    in == v
+  
+  override def sameOut[V1 >: V](v: V1): Boolean =
+  	out == v
 }
 
 /** A trait for the undirected edge.
@@ -60,6 +70,12 @@ sealed trait UndiEdge[+V, +X] extends EdgeLike[V, X, UndiEdge]
   override def ==~ [V1 >: V](e: UndiEdge[V1, _]): Boolean =
     (_1 == e._1 && _2 == e._2) || (_1 == e._2 && _2 == e._1)
 
+  override def sameIn[V1 >: V](v: V1): Boolean =
+    in == v || out == v
+  
+  override def sameOut[V1 >: V](v: V1): Boolean =
+  	in == v || out == v
+  
   def directedEdges: (DiEdge[V, X], DiEdge[V, X])
 
   override def toUndirectedEdge: UndiEdge[V, X] =

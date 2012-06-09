@@ -1,20 +1,29 @@
 package org.lkbgraph.immutable
 import scala.annotation.tailrec
 import scala.collection.immutable.Queue
+import scala.collection.mutable.Builder
 import org.lkbgraph._
+import org.lkbgraph.mutable.TreeBuilder
 
 /** A trait for tree.
  * 
  * @author Łukasz Szpakowski
  */
 trait Tree[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends TreeLike[V, X, E, Graph[V, X, E], Tree[V, X, E]] with Graph[V, X, E]
+{
+  override def newTreeBuilder(root: V): Builder[E[V, X], Tree[V, X, E]] =
+    Tree.newTreeBuilder(root)
+}
 
 /** A trait for tree.
  * 
  * @author Łukasz Szpakowski
  */
-object Tree
+object Tree extends TreeFactory[Tree]
 {
+  override def treeEmpty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: V): Tree[V, X, E] =
+    new ImplTree(root, Map())
+  
   private class ImplTree[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](val root: V, private val mChildEdgeLists: Map[V, List[E[V, X]]]) extends Tree[V, X, E]
   {
     override def vertices: Iterable[V] =
@@ -81,14 +90,4 @@ object Tree
     override def -! (param: GraphParam[V, Unweighted, E]): Graph[V, X, E] =
       (newBuilder ++= this).result -! param
   }
-  
-  /** Creates a new tree from the root and edges.
-   * @param root		the root.
-   * @param es			the edges.
-   * @return			a new tree.
-   */
-  def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: V, es: E[V, X]*): Tree[V, X, E] =
-    (1 to es.length).foldLeft(new ImplTree(root, Map()): Tree[V, X, E], es.toSet) { 
-      case((tree, es), _) => es.find { e => tree.containsVertex(e.in) }.map { e => (tree +~^ e, es - e) }.getOrElse(tree, es)
-    }._1
 }
