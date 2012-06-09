@@ -146,7 +146,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
     {
       override def graphPrefix: String = "directed"
 
-      override def makeEdge(v: Char, u: Char) = v ~> u
+      override def makeEdge(v: Char, u: Char) = v -> u unw
       
       override def genGraphParamData = genUnwDiGraphParamData
       

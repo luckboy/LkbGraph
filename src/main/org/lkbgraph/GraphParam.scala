@@ -37,6 +37,9 @@ sealed trait EdgeLike[+V, +X, E[+_, +_]] extends GraphParam[V, X, E] with Produc
   def sameIn[V1 >: V](v: V1): Boolean
   
   def sameOut[V1 >: V](v: V1): Boolean
+  
+  def unw: E[V, Unweighted] =
+    toUnweightedEdge
 }
 
 /** A trait for the directed edge.
@@ -97,7 +100,7 @@ sealed trait Unweighted
  */
 sealed trait UnwEdgeToWEdge[+V, +WE[+_, +_]]
 {
-  def % [W](weight: W): WE[V, W]
+  def w[W](weight: W): WE[V, W]
 }
 
 /** A class for the vertex.
@@ -134,7 +137,7 @@ case class UnwDiEdge[+V](in: V, out: V) extends DiEdge[V, Unweighted] with UnwEd
   override def toUndirectedEdge: UnwUndiEdge[V] =
     UnwUndiEdge(in, out)
 
-  override def % [W](weight: W): WDiEdge[V, W] =
+  override def w[W](weight: W): WDiEdge[V, W] =
     WDiEdge(in, out, weight)
 
   override def toString: String =
@@ -166,7 +169,7 @@ case class WDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdge[V, Weighted[
     WUndiEdge(in, out, weight)
 
   override def toString: String =
-    in + " ~> " + out + " % " + weight
+    in + " -> " + out + " w " + weight
 }
 
 /** A class for the undirected edge without weight.
@@ -193,7 +196,7 @@ case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with Un
   override def directedEdges: (UnwDiEdge[V], UnwDiEdge[V]) =
     (UnwDiEdge(_1, _2), UnwDiEdge(_1, _2))
 
-  override def % [W](weight: W): WUndiEdge[V, W] =
+  override def w[W](weight: W): WUndiEdge[V, W] =
     WUndiEdge(_1, _2, weight)
     
   override def equals(that: Any) =
@@ -243,5 +246,5 @@ case class WUndiEdge[+V, +W](_1: V, _2: V, weight: W) extends UndiEdge[V, Weight
     _1.hashCode ^ _2.hashCode ^ weight.hashCode
 
   override def toString: String =
-    _1 + " ~ " + _2 + " % " + weight
+    _1 + " ~ " + _2 + " w " + weight
 }
