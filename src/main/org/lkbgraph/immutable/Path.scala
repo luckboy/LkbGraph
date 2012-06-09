@@ -18,7 +18,7 @@ trait Path[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends PathLike[V, X, E, Graph
  */
 object Path extends PathFactory[Path]
 {
-  def pathEmpty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: V): Path[V, X, E] =
+  override def pathEmpty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: V): Path[V, X, E] =
     new ImplPath(root, Seq())
   
   private class ImplPath[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](val root: V, val edgeSeq: Seq[E[V, X]]) extends Path[V, X, E]
@@ -30,6 +30,6 @@ object Path extends PathFactory[Path]
     }
       
     override def -@/ (s: V): Path[V, X, E] =
-      new ImplPath(root, edgeSeq.takeWhile { e => e.in != s })
+      new ImplPath(root, edgeSeq.takeWhile { _.in != s })
   }
 }
