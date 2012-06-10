@@ -112,6 +112,10 @@ object DisjointSet
       }
       this
     }
+    
+    /** Returns a new disjoint set that has this node. */
+    def toDisjointSet: DisjointSet[T] =
+      new DisjointSet(this)
   }
   
   /** Creates a new disjoint set from nodes.
