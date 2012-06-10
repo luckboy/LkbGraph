@@ -1,74 +1,63 @@
 package org.lkbgraph.mutable
-import scala.annotation.tailrec
 
 /** A class is the implementation of the disjoint set.
  * 
  * @author Łukasz Szpakowski
  */
-class DisjointSet[T](val nodeValue: T) extends DisjointSet.OptNode[T]
+class DisjointSet[T](private val mNode: DisjointSet.Node[T])
 { 
   import DisjointSet._
   
-  private var mParent: DisjointSet.OptNode[T]= NoNode
-    
-  private var mRank = 0
-          
-  @tailrec
-  private def find(node: DisjointSet[T]): DisjointSet[T] =
-    node.mParent match {
-      case NoNode            => node
-      case p: DisjointSet[T] => find(p)
-    }
-    
-  /** Returns true if this set contains the set, false otherwise.
-   * @param	node		the set.
-   * @return			true if this set contains the specified set.
+  /** Returns true if this set contains the specified node, false otherwise.
+   * @param	node		the node.
+   * @return			true if this set contains the specified node.
    */
-  def contains(node: DisjointSet[T]): Boolean =
-    find(this) eq find(node)
+  def contains(node: Node[T]): Boolean =
+    mNode.root eq node.root
   
-  /** Combines this set with the specified set.
+  /** Adds the specified node to this set.
    * @param node		the set.
    * @return 			this set.
    */
-  def += (node: DisjointSet[T]): this.type =  {
-    val thisRoot = find(this)
-    val nodeRoot = node.find(this)
-    if(thisRoot ne nodeRoot) {
-      if(thisRoot.mRank < nodeRoot.mRank) {
-        thisRoot.mParent = nodeRoot
-      } else if(thisRoot.mRank > nodeRoot.mRank) {
-        nodeRoot.mParent = thisRoot
-      } else {
-        nodeRoot.mParent = thisRoot
-        thisRoot.mRank += 1
-      }
-    }
+  def += (node: Node[T]): this.type = {
+    mNode.union(node)
     this
   }
   
-  /** Combines this set with the specified sets. */
-  def +=(node1: DisjointSet[T], node2: DisjointSet[T], nodes: DisjointSet[T]*): this.type = {
-    this += node1 += node2 ++= nodes
+  /** Adds the specified nodes to this set. */
+  def +=(node1: Node[T], node2: Node[T], nodes: Node[T]*): this.type = {
+    mNode.union(node1).union(node2)
+    this ++= nodes
   }
   
-  /** Combines this set with the specified sets. */
-  def ++= (nodes: TraversableOnce[DisjointSet[T]]): this.type = {
+  /** Adds the specified nodes to this set. */
+  def ++= (nodes: TraversableOnce[Node[T]]): this.type = {
     for(node <- nodes) +=(node)
     this
   }
   
+  /** Combines this set with the specified set. 
+   * @param set		the set.
+   * @return		this set.
+   */
+  def |= (set: DisjointSet[T]): this.type = {
+    this += set.mNode
+  }
+  
   override def equals(that: Any): Boolean =
     that match {
-      case ds: DisjointSet[T] => find(this) eq find(ds)
-      case _                  => false
+      case node: Node[T] => mNode.root eq node.root
+      case _             => false
     }
   
   override def hashCode: Int =
-    find(this).nodeValue.hashCode
+    mNode.root.hashCode
   
   override def toString: String =
-    "DisjointSet(" + nodeValue + ",...)"
+    if(mNode.root eq mNode)
+      "DisjointSet(" + mNode.root + ")"
+    else
+      "DisjointSet(" + mNode.root + ",...)"
 }
 
 /** A singleton for the implementation of the disjoint set.
@@ -80,7 +69,56 @@ object DisjointSet
   trait OptNode[+T]
 
   case object NoNode extends OptNode[Nothing]
+
+  /** A node class for the implementation of the disjoint set.
+   * 
+   * @author Łukasz Szpakowski
+   */
+  case class Node[T](val value: T)  extends OptNode[T]
+  {
+    private var mParent: OptNode[T] = NoNode
+    
+    private var mRank = 0
+          
+    private def find(node: Node[T]): Node[T] =
+      node.mParent match {
+        case NoNode     => node
+        case p: Node[T] => 
+          val nodeRoot =  find(p)
+          node.mParent = nodeRoot
+          nodeRoot
+      }
+
+    /** The root. */
+    def root: Node[T] =
+      find(this)
+      
+    /** Adds the specified node to the set that has this node.
+     * @param node		the node.
+     * @return			this node.
+     */
+    def union(node: Node[T]): this.type =  {
+      val thisRoot = root
+      val nodeRoot = node.root
+      if(thisRoot ne nodeRoot) {
+        if(thisRoot.mRank < nodeRoot.mRank) {
+          thisRoot.mParent = nodeRoot
+        } else if(thisRoot.mRank > nodeRoot.mRank) {
+          nodeRoot.mParent = thisRoot
+        } else {
+          nodeRoot.mParent = thisRoot
+          thisRoot.mRank += 1
+        }
+      }
+      this
+    }
+  }
   
-  def apply[T](value: T): DisjointSet[T] =    
-    new DisjointSet(value)
+  /** Creates a new disjoint set from nodes.
+   * @param node		the first node.
+   * @param nodes		the nodes.
+   * @return			a new disjoint set.
+   */
+  def apply[T](node: Node[T], nodes: Node[T]*): DisjointSet[T] =    
+    new DisjointSet(node) ++= nodes
 }
