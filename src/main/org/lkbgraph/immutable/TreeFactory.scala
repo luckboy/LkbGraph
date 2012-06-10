@@ -19,6 +19,6 @@ abstract class TreeFactory[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: T
    * @param es			the edges.
    * @return			a new tree.
    */
-  def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: V, es: E[V, X]*): Tree[V, X, E] =
-    (newTreeBuilder(root) ++= es).result
+  def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: Vertex[V], es: E[V, X]*): Tree[V, X, E] =
+    (newTreeBuilder(root.value) ++= es).result
 }

@@ -136,7 +136,7 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
     (newBuilder ++= this).result -! param
     
   override def toString: String =
-    stringPrefix + "(" + root + "," + edges.mkString(",") + ")"
+    stringPrefix + "(" + Vertex(root) + "," + edges.mkString(",") + ")"
 
   override def stringPrefix: String =
     "Tree"
