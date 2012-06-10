@@ -17,7 +17,7 @@ abstract class PathFactory[PP[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: P
   /** Creates a new path from the root and edges.
    * @param root		the root.
    * @param es			the edges.
-   * @return			a new tree.
+   * @return			a new path.
    */
   def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](root: Vertex[V], es: E[V, X]*): Tree[V, X, E] =
     (newPathBuilder(root.value) ++= es).result
