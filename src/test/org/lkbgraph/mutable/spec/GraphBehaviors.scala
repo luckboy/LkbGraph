@@ -33,7 +33,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: mutable
   def mutableGraph
   {
     describe("+@=") {
-      it("should add a new vertex into the graph") {
+      it("should add a new vertex onto the graph") {
         forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
           case (vs, v) =>
             val g = graphFactory[Char, Unweighted, DiEdge]() ++ (vs - v).map(V[Char])
@@ -43,7 +43,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: mutable
         }
       }
       
-      it("shouldn't add the exitent vertex in the graph into the graph") {
+      it("shouldn't add the exitent vertex in the graph onto the graph") {
         forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
           case (vs, v) =>
             val g = graphFactory[Char, Unweighted, DiEdge]() ++ vs.map(V[Char])
@@ -58,7 +58,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: mutable
       def growable[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: AddSubGens[X, E]) = {
         import gens._
         
-        it("should add a new edge that vertices is a non-existent into the " + gens.graphPrefix + " graph") {
+        it("should add a new edge that vertices is a non-existent onto the " + gens.graphPrefix + " graph") {
           forAll(genGraphParamDataWithoutEdgeAndVertices) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ ps
@@ -71,7 +71,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: mutable
           }
         }
         
-        it("should add a new edge that vertices is the existent into the " + gens.graphPrefix + " graph") {
+        it("should add a new edge that vertices is the existent onto the " + gens.graphPrefix + " graph") {
           forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ (ps - e)
@@ -83,7 +83,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: mutable
           }
         }
         
-        it("shouldn't add the existent edge into the " + gens.graphPrefix + " graph") {
+        it("shouldn't add the existent edge onto the " + gens.graphPrefix + " graph") {
           forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ ps
