@@ -33,7 +33,7 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
     override protected def edgeLists: collection.mutable.Map[V, List[E[V, X]]]
   
   override def +@= (v: V): this.type = {
-    edgeLists += (v -> Nil)
+    edgeLists += (v -> edgeListFrom(v))
     this
   }
   
@@ -53,8 +53,8 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
   
   override def -~!= (e: E[V, Unweighted]): this.type = {
     if(e._1 != e._2) {
-      edgeLists += (e.in -> edgeListFrom(e.in).filterNot { _ ==~ e })
-      if(!e.isDirected) edgeLists += (e.out -> edgeListFrom(e.out).filterNot { _ ==~ e })
+      if(edgeLists.contains(e.in)) edgeLists += (e.in -> edgeListFrom(e.in).filterNot { _ ==~ e })
+      if(!e.isDirected && edgeLists.contains(e.out)) edgeLists += (e.out -> edgeListFrom(e.out).filterNot { _ ==~ e })
     }
     this
   }
@@ -64,14 +64,11 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
  * 
  * @author Łukasz Szpakowski
  */
-object AdjListGraph
+object AdjListGraph extends GraphFactory[AdjListGraph]
 {
   def empty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: AdjListGraph[V, X, E] = 
     new ImplAdjListGraph[V, X, E](collection.mutable.Map())
-  
-  def newBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z,  E]]: collection.mutable.Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
-    new collection.mutable.SetBuilder[GraphParam[V, X, E], AdjListGraph[V, X, E]](empty)
-    
+      
   private class ImplAdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](protected val edgeLists: collection.mutable.Map[V, List[E[V, X]]]) extends AdjListGraph[V, X, E]
   {
     override protected def newAdjListGraph(es: collection.Map[V, List[E[V, X]]]): AdjListGraph[V, X, E] =
@@ -79,12 +76,5 @@ object AdjListGraph
         case mes: collection.mutable.Map[V, List[E[V, X]]] => new ImplAdjListGraph(mes)
         case _                                             => new ImplAdjListGraph(collection.mutable.Map() ++ es)
       }
-  }
-  
-  /** Creates a new graph from the vertices and / or the edges.
-   * @param params		the vertices and / or the edges.
-   * @return			a new graph.
-   */
-  def apply[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](params: GraphParam[V, X, E]*): Graph[V, X, E] =
-    (newBuilder[V, X, E] ++= params).result
+  }  
 }

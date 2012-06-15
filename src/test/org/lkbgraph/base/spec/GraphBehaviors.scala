@@ -22,7 +22,6 @@ import org.scalatest.prop.PropertyChecks
 import org.scalacheck.Gen
 import org.lkbgraph._
 import org.lkbgraph.immutable
-import org.lkbgraph._
 
 trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Graph[XV, XX, XE]] extends PropertyChecks with ShouldMatchers
 {
@@ -32,6 +31,58 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
   import spec.GraphParamGen.GraphGen._
 
   def graphFactory: base.GraphFactory[GG]
+  
+  trait AddSubGens[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]
+  {
+    def graphPrefix: String
+      
+    def makeEdge(v: Char, u: Char): E[Char, X]
+      
+    def genGraphParamDataWithoutEdgeAndVertices: Gen[(GraphParamData[GraphParam[Char, X, E], Char, E[Char, X]], E[Char, X])] =
+      for {
+        vs <- genVertices; us <- Gen.pick(2, vs); es <- genEdges(vs -- us)
+      } yield {
+        val Seq(v, u) = us
+        val vs2 = vs -- us
+        (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), makeEdge(v, u)) 
+      }
+        
+    def genGraphParamData: Gen[GraphParamData[GraphParam[Char, X, E], Char, E[Char, X]]]
+      
+    def genEdges(vs: Set[Char]): Gen[Set[E[Char, X]]]
+  }
+    
+  implicit object UnwDiAddSubGens extends AddSubGens[Unweighted, DiEdge]
+  {
+    override def graphPrefix: String = "directed"
+
+    override def makeEdge(v: Char, u: Char) = v -> u unw
+      
+    override def genGraphParamData = genUnwDiGraphParamData
+      
+    override def genEdges(vs: Set[Char]) = genUnwDiEdges(vs)
+  }
+
+  implicit object UnwUndiAddSubGens extends AddSubGens[Unweighted, UndiEdge]
+  {
+    override def graphPrefix: String = "undirected"
+
+    override def makeEdge(v: Char, u: Char) = v ~ u
+      
+    override def genGraphParamData = genUnwUndiGraphParamData
+      
+    override def genEdges(vs: Set[Char]) = genUnwUndiEdges(vs)
+  }
+  
+  val genUnwDiGraphParamDataWithoutConnectedVertex = for { 
+    vs <- genVertices
+    v <- Gen.oneOf(vs.toSeq)
+    es <- genUnwDiEdges(vs - v)
+    us <- Gen.someOf(vs - v) 
+  } yield { 
+    val vs2 = vs - v
+    (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), (v, us.map { UnwDiEdge[Char](v, _) }.toSet))
+  }
   
   def graph
   {
@@ -139,48 +190,6 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
       }
     }
     
-    trait AddSubGens[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]
-    {
-      def graphPrefix: String
-      
-      def makeEdge(v: Char, u: Char): E[Char, X]
-      
-      def genGraphParamDataWithoutEdgeAndVertices: Gen[(GraphParamData[GraphParam[Char, X, E], Char, E[Char, X]], E[Char, X])] =
-        for {
-          vs <- genVertices; us <- Gen.pick(2, vs); es <- genEdges(vs -- us)
-        } yield {
-          val Seq(v, u) = us
-          val vs2 = vs -- us
-          (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), makeEdge(v, u)) 
-        }
-        
-      def genGraphParamData: Gen[GraphParamData[GraphParam[Char, X, E], Char, E[Char, X]]]
-      
-      def genEdges(vs: Set[Char]): Gen[Set[E[Char, X]]]
-    }
-    
-    implicit object UnwDiAddSubGens extends AddSubGens[Unweighted, DiEdge]
-    {
-      override def graphPrefix: String = "directed"
-
-      override def makeEdge(v: Char, u: Char) = v -> u unw
-      
-      override def genGraphParamData = genUnwDiGraphParamData
-      
-      override def genEdges(vs: Set[Char]) = genUnwDiEdges(vs)
-    }
-
-    implicit object UnwUndiAddSubGens extends AddSubGens[Unweighted, UndiEdge]
-    {
-      override def graphPrefix: String = "undirected"
-
-      override def makeEdge(v: Char, u: Char) = v ~ u
-      
-      override def genGraphParamData = genUnwUndiGraphParamData
-      
-      override def genEdges(vs: Set[Char]) = genUnwUndiEdges(vs)
-    }
-
     describe("+~") {
       def addable[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: AddSubGens[X, E]) = {
         import gens._
@@ -197,7 +206,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
           }
         }
 
-        it("should return a " +graphPrefix + " graph with a modified edge set for a new edge that vertices set is exists") {
+        it("should return a " +graphPrefix + " graph with a modified edge set for a new edge that vertices is exists") {
           forAll(for(t <- genGraphParamData; e <- Gen.oneOf(t.es.toSeq)) yield (t, e)) {
             case (GraphParamData(ps, vs, es), e) =>
               val g = graphFactory[Char, X, E]() ++ (ps - e)
@@ -250,15 +259,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
       }
       
       it("should return a copy of the graph without the edges which are connected to the removed vertex") {
-        forAll(for { 
-            vs <- genVertices
-            v <- Gen.oneOf(vs.toSeq)
-            es <- genUnwDiEdges(vs - v)
-            us <- Gen.someOf(vs - v) 
-          } yield { 
-            val vs2 = vs - v
-            (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), (v, us.map { UnwDiEdge[Char](v, _) }.toSet))
-          }) {
+        forAll(genUnwDiGraphParamDataWithoutConnectedVertex) {
           case (GraphParamData(ps, vs, es), (v, es2)) =>
             val ps2 = ps + V(v) ++ es2
             val g = graphFactory[Char, Unweighted, DiEdge]() ++ ps2
