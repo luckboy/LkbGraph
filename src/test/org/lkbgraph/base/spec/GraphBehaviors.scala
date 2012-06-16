@@ -21,14 +21,14 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.prop.PropertyChecks
 import org.scalacheck.Gen
 import org.lkbgraph._
-import org.lkbgraph.immutable
+import org.lkbgraph.immutable._
 
 trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Graph[XV, XX, XE]] extends PropertyChecks with ShouldMatchers
 {
   this: Spec =>
 
-  import spec.GraphParamGen._
-  import spec.GraphParamGen.GraphGen._
+  import org.lkbgraph.spec.GraphParamGen._
+  import org.lkbgraph.spec.GraphParamGen.GraphGen._
 
   def graphFactory: base.GraphFactory[GG]
   

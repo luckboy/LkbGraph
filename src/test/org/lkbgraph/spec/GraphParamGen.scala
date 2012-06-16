@@ -17,6 +17,7 @@
 
 package org.lkbgraph.spec
 import org.scalacheck._
+import org.scalacheck.util._
 import org.scalacheck.Arbitrary.arbitrary
 import org.lkbgraph._
 
@@ -67,5 +68,50 @@ object GraphParamGen
     val genWUndiGraphParamData = for(vs <- genVertices; es <- genWUndiEdges(vs)) yield { 
       GraphParamData(vs.map(Vertex[Char]) ++ es, vs, es)
     }
+  }
+  
+  case class TreeParamData[V, E](root: Char, vs: Set[Char], es: Set[E])
+  
+  object TreeGen {
+    def genEdges[W, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](vs: Set[Char], us: Set[Char])(f: (Char, Char, W) => E[Char, X])(implicit arb: Arbitrary[W]): Gen[Seq[E[Char, X]]] =
+      for {
+        v <- Gen.oneOf(vs.toSeq)
+        (vs2, es) <- Gen.someOf(us).map2(Gen.listOfN[W](us.size, arbitrary[W])) { (us, ws) => (us, us.zip(ws).map { case (u, w) => f(v, u, w) }) }
+        es2 <- if(((vs - v) ++ vs2).isEmpty) Gen.value(Seq()) else genEdges((vs - v) ++ vs2, us -- vs2)(f)
+      } yield es ++ es2
+    
+    def genUnwDiEdges(root: Char, vs: Set[Char]) =
+      genEdges[Unit, Unweighted, DiEdge](Set(root), vs - root) { (v, u, _) =>  v -> u }
+    
+    def genUnwUndiEdges(root: Char, vs: Set[Char]) =
+      genEdges[Unit, Unweighted, UndiEdge](Set(root), vs - root) { (v, u, _) =>  v ~ u }
+    
+    def genWDiEdges(root: Char, vs: Set[Char]) =
+      genEdges[Int, Weighted[Int], DiEdge](Set(root), vs - root) { (v, u, w) =>  v -> u w w }
+    
+    def genWUndiEdges(root: Char, vs: Set[Char]) =
+      genEdges[Int, Weighted[Int], UndiEdge](Set(root), vs - root) { (v, u, w) =>  v ~ u w w }
+    
+    val genUnwDiTreeParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genUnwDiEdges(v, vs)) yield {
+      TreeParamData[Char, DiEdge[Char, Unweighted]](v, vs, es.toSet)
+    }
+
+    val genUnwUndiTreeParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genUnwUndiEdges(v, vs)) yield {
+      TreeParamData[Char, UndiEdge[Char, Unweighted]](v, vs, es.toSet)
+    }
+    
+    val genWDiTreeParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genWDiEdges(v, vs)) yield {
+      TreeParamData[Char, DiEdge[Char, Weighted[Int]]](v, vs, es.toSet)
+    }
+    
+    val genWUndiTreeParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genWUndiEdges(v, vs)) yield {
+      TreeParamData[Char, UndiEdge[Char, Weighted[Int]]](v, vs, es.toSet)
+    }
+  }
+
+  case class PathData[V, E](root: Char, es: Set[E])
+  
+  object PathGen {
+    
   }
 }

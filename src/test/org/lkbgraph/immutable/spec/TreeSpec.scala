@@ -15,32 +15,19 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package org.lkbgraph.mutable
-import scala.annotation.tailrec
-import scala.collection.mutable.Builder
+package org.lkbgraph.immutable.spec
+import org.scalatest.Spec
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.lkbgraph._
 import org.lkbgraph.immutable._
 
-/** A builder class for tree.
- * 
- * @author Łukasz Szpakowski
- */
-class TreeBuilder[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], T <: Tree[V, X, E] with TreeLike[V, X, E, _, T]](empty: T) extends Builder[E[V, X], T]
+@RunWith(classOf[JUnitRunner])
+class TreeSpec extends Spec with TreeBehaviors[Tree]
 {
-  private val mEdgeLists = collection.mutable.Map[V, List[E[V, X]]]()
+  override def treeFactory: TreeFactory[Tree] = Tree
   
-  override def += (elem: E[V, X]): this.type = {
-    mEdgeLists += (elem.in -> (elem :: mEdgeLists.getOrElse(elem.in, Nil)))
-    if(!elem.isDirected) mEdgeLists += (elem.out -> (elem :: mEdgeLists.getOrElse(elem.out, Nil)))
-    this
+  describe("A Tree") {
+    it should behave like tree
   }
-	
-  override def clear(): Unit =
-    mEdgeLists.clear()  
-    
-  override def result(): T =
-    (1 to mEdgeLists.size).foldLeft(empty, mEdgeLists.clone()) {
-      case ((t, els), _) => 
-        t.nodes.find(els.contains).flatMap { v => els.get(v).map { es => (es.foldLeft(t){ _ +~^ _ }, els -= v) } }.getOrElse(t, els)
-    }._1
 }

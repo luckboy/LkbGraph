@@ -44,7 +44,7 @@ object Tree extends TreeFactory[Tree]
   private class ImplTree[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](val root: V, private val mChildEdgeLists: Map[V, List[E[V, X]]]) extends Tree[V, X, E]
   {
     override def vertices: Iterable[V] =
-      mChildEdgeLists.keys
+      Set(root) ++ mChildEdgeLists.keys
     
     override def edges: Iterable[E[V, X]] =
       edgesIterator.toIterable
@@ -65,7 +65,7 @@ object Tree extends TreeFactory[Tree]
      
     override def +~^ (e: E[V, X]): Tree[V, X, E] = {
       val e2 = if(!e.isDirected && !containsVertex(e.in)) e.swap else e
-      if(containsVertex(e2.out) && !containsVertex(e2.out))
+      if(containsVertex(e2.in) && !containsVertex(e2.out))
         new ImplTree(root, mChildEdgeLists + (e2.in -> childEdgeListFromWithEdge(e2.in, e2)) + (e2.out -> Nil))
       else
         new ImplTree(root, mChildEdgeLists)

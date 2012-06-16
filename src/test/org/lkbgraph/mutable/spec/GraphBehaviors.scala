@@ -21,14 +21,14 @@ import org.scalatest.matchers.ShouldMatchers
 import org.scalatest.prop.PropertyChecks
 import org.scalacheck.Gen
 import org.lkbgraph._
-import org.lkbgraph.mutable
+import org.lkbgraph.mutable._
 
-trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: mutable.Graph[XV, XX, XE]] extends base.spec.GraphBehaviors[GG]
+trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Graph[XV, XX, XE]] extends base.spec.GraphBehaviors[GG]
 {
   this: Spec =>
 
-  import spec.GraphParamGen._
-  import spec.GraphParamGen.GraphGen._
+  import org.lkbgraph.spec.GraphParamGen._
+  import org.lkbgraph.spec.GraphParamGen.GraphGen._
 
   def mutableGraph
   {
