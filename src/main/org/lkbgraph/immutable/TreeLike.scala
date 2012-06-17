@@ -19,7 +19,7 @@ package org.lkbgraph.immutable
 import scala.collection.mutable.Builder
 import org.lkbgraph._
 
-/** A template trait for immutable tree.
+/** A template trait for tree.
  * 
  * @author Łukasz Szpakowski
  */
@@ -81,9 +81,10 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    */
   def childEdgesFrom(s: V): Iterable[E[V, X]]
 
-  /** Returns a copy of the tree with the specified edge if either of two edge vertices is exists at the tree. In case 
-   * the edge is directed, the input vertex of the edge should be in the tree and the output vertex shouldn't to be at 
-   * the tree. If the following condition isn't satisfied, the edge don't add to a copy of the tree.
+  /** Returns a copy of the tree with the specified edge if either of two edge vertices is exists at the tree or the edge
+   * is exists at the tree. In case the edge is directed, the input vertex of the edge should be in the tree and the output 
+   * vertex shouldn't to be at the tree. If the following condition isn't satisfied, the edge don't add to a copy of the 
+   * tree.
    * @param e			the edge.
    * @return 			a copy of the tree with the specified edge.
    */

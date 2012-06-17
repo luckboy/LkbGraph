@@ -19,7 +19,7 @@ package org.lkbgraph.immutable
 import scala.collection.mutable.Builder
 import org.lkbgraph._
 
-/** A template trait for immutable path.
+/** A template trait for path.
  * 
  * @author Łukasz Szpakowski
  */

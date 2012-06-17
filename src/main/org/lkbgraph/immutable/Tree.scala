@@ -58,17 +58,21 @@ object Tree extends TreeFactory[Tree]
     override def childEdgesFrom(s: V): Iterable[E[V, X]] =
       childEdgeListFrom(s)
 
-    private def childEdgeListFromWithEdge(s: V, e: E[V, X]): List[E[V, X]] = {
-      val es = childEdgeListFrom(s)
-      if(es.exists(e ==~)) es else e :: es
-    }      
+    private def childEdgeListFromWithEdge(s: V, e: E[V, X]): List[E[V, X]] =
+      e :: (childEdgeListFrom(s).filterNot(e ==~))
      
     override def +~^ (e: E[V, X]): Tree[V, X, E] = {
       val e2 = if(!e.isDirected && !containsVertex(e.in)) e.swap else e
-      if(containsVertex(e2.in) && !containsVertex(e2.out))
+      if(containsVertex(e2.in) && !containsVertex(e2.out)) {
         new ImplTree(root, mChildEdgeLists + (e2.in -> childEdgeListFromWithEdge(e2.in, e2)) + (e2.out -> Nil))
-      else
-        new ImplTree(root, mChildEdgeLists)
+      } else {
+        if(mChildEdgeLists.get(e.in).map { _.exists(e ==~) }.getOrElse(false))
+          new ImplTree(root, mChildEdgeLists + (e.in -> childEdgeListFromWithEdge(e.in, e)))
+        else if(!e.isDirected && mChildEdgeLists.get(e.out).map { _.exists(e ==~) }.getOrElse(false))
+          new ImplTree(root, mChildEdgeLists + (e.out -> childEdgeListFromWithEdge(e.out, e.swap)))
+        else
+          new ImplTree(root, mChildEdgeLists)
+      }
     }
     
     @tailrec

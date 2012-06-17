@@ -29,4 +29,7 @@ package object lkbgraph
   
   implicit def anyToUnwUndiEdgeAssoc[V](x: V) =
     new UnwUndiEdgeAssoc(x)
+  
+  implicit def wEdgeToWeighted[W, E[+Y, +Z] <: EdgeLike[Y, Z, E]](x: E[_, Weighted[W]]) =
+    x.toWeighted
 }

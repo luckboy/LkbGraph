@@ -54,10 +54,8 @@ trait AdjListGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: AdjListGraphL
   override def +@ (v: V): G =
     newAdjListGraph(edgeLists + (v -> edgeListFrom(v)))
     
-  protected def edgeListFromWithEdge(s: V, e: E[V, X]) = {
-    val es = edgeListFrom(s)
-    if(es.exists { _ ==~ e }) es else (e :: es)
-  }
+  protected def edgeListFromWithEdge(s: V, e: E[V, X]) =
+    e :: (edgeListFrom(s).filterNot(e ==~))
   
   override def +~ (e: E[V, X]): G =
     if(e._1 != e._2) {

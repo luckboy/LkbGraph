@@ -57,6 +57,8 @@ sealed trait EdgeLike[+V, +X, E[+_, +_]] extends GraphParam[V, X, E] with Produc
   
   def unw: E[V, Unweighted] =
     toUnweightedEdge
+    
+  def toWeighted: X
 }
 
 /** A trait for the directed edge.
@@ -134,7 +136,7 @@ case class Vertex[+V](value: V) extends GraphParam[V, Nothing, Nothing]
  * 
  * @author Łukasz Szpakowski
  */
-case class UnwDiEdge[+V](in: V, out: V) extends DiEdge[V, Unweighted] with UnwEdgeToWEdge[V, WDiEdge]
+case class UnwDiEdge[+V](in: V, out: V) extends DiEdge[V, Unweighted] with UnwEdgeToWEdge[V, WDiEdge] with Unweighted
 {
   override def _1: V =
     in
@@ -156,6 +158,9 @@ case class UnwDiEdge[+V](in: V, out: V) extends DiEdge[V, Unweighted] with UnwEd
 
   override def w[W](weight: W): WDiEdge[V, W] =
     WDiEdge(in, out, weight)
+
+  override def toWeighted: Unweighted =
+    this
 
   override def toString: String =
     in + " -> " + out
@@ -185,6 +190,9 @@ case class WDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdge[V, Weighted[
   override def toUndirectedEdge: WUndiEdge[V, W] =
     WUndiEdge(in, out, weight)
 
+  override def toWeighted: Weighted[W] =
+    this
+
   override def toString: String =
     in + " -> " + out + " w " + weight
 }
@@ -193,7 +201,7 @@ case class WDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdge[V, Weighted[
  * 
  * @author Łukasz Szpakowski
  */
-case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with UnwEdgeToWEdge[V, WUndiEdge]
+case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with UnwEdgeToWEdge[V, WUndiEdge] with Unweighted
 {
   override def in: V =
     _1
@@ -216,6 +224,9 @@ case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with Un
   override def w[W](weight: W): WUndiEdge[V, W] =
     WUndiEdge(_1, _2, weight)
     
+  override def toWeighted: Unweighted =
+    this
+
   override def equals(that: Any) =
     that match {
       case UnwUndiEdge(v1, v2) => (_1 == v1 && _2 == v2) || (_1 == v2 && _2 == v1)
@@ -233,7 +244,7 @@ case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with Un
  * 
  * @author Łukasz Szpakowski
  */
-case class WUndiEdge[+V, +W](_1: V, _2: V, weight: W) extends UndiEdge[V, Weighted[W]]
+case class WUndiEdge[+V, +W](_1: V, _2: V, weight: W) extends UndiEdge[V, Weighted[W]] with Weighted[W]
 { 
   override def in: V =
     _1
@@ -252,6 +263,9 @@ case class WUndiEdge[+V, +W](_1: V, _2: V, weight: W) extends UndiEdge[V, Weight
   
   override def toUnweightedEdge: UnwUndiEdge[V] =
     UnwUndiEdge(_1, _2)
+
+  override def toWeighted: Weighted[W] =
+    this
 
   override def equals(that: Any) =
     that match {

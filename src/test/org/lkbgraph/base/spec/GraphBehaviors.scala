@@ -234,7 +234,44 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
       it should behave like addable[Unweighted, DiEdge]
       it should behave like addable[Unweighted, UndiEdge]
       
-      //TODO add checking whether correctly replaces edge for the edge with the weight.
+      it("should return a directed graph with the replaced edge with weight for a new weight") {
+        forAll(for(t <- genWDiGraphParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (GraphParamData(ps, vs, es), e, dw) => 
+            val g = graphFactory[Char, Weighted[Int], DiEdge]() ++ ps
+            val e2 = e.in -> e.out w (e.weight ^ dw)
+            val g2 = g +~ e2
+            g2.vertices.toSet should be === vs
+            g2.vertices should have size(vs.size)
+            g2.edges.toSet should be === ((es - e) + e2)
+            g2.edges should have size(es.size)
+        }
+      }
+
+      it("should return a undirected graph with the replaced edge with weight for a new weight") {
+        forAll(for(t <- genWUndiGraphParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (GraphParamData(ps, vs, es), e, dw) => 
+            val g = graphFactory[Char, Weighted[Int], UndiEdge]() ++ ps
+            val e2 = e.in ~ e.out w (e.weight ^ dw)
+            val g2 = g +~ e2
+            g2.vertices.toSet should be === vs
+            g2.vertices should have size(vs.size)
+            g2.edges.toSet should be === ((es - e) + e2)
+            g2.edges should have size(es.size)
+        }
+      }
+
+      it("should return a undirected graph with the replaced swaped edge with weight for a new weight") {
+        forAll(for(t <- genWUndiGraphParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (GraphParamData(ps, vs, es), e, dw) => 
+            val g = graphFactory[Char, Weighted[Int], UndiEdge]() ++ ps
+            val e2 = e.out ~ e.in w (e.weight ^ dw)
+            val g2 = g +~ e2
+            g2.vertices.toSet should be === vs
+            g2.vertices should have size(vs.size)
+            g2.edges.toSet should be === ((es - e) + e2)
+            g2.edges should have size(es.size)
+        }
+      }
     }
 
     describe("-@") {

@@ -291,7 +291,44 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
         }
       }
 
-      //TODO add checking whether correctly replaces the edge for edge with weight.
+      it("should return a directed tree with the replaced edge with weight for a new weight") {
+        forAll(for(t <- genWDiTreeParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (TreeParamData(v, vs, es), e, dw) => 
+            val t = (treeFactory.newTreeBuilder(v) ++= es).result
+            val e2 = e.in -> e.out w (e.weight ^ dw)
+            val t2 = t +~^ e2
+            t2.vertices.toSet should be ===(vs)
+            t2.vertices should have size(vs.size)
+            t2.edges.toSet should be ===((es - e) + e2)
+            t2.edges should have size(es.size)
+        }
+      }
+
+      it("should return a undirected tree with the replaced edge with weight for a new weight") {
+        forAll(for(t <- genWUndiTreeParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (TreeParamData(v, vs, es), e, dw) => 
+            val t = (treeFactory.newTreeBuilder(v) ++= es).result
+            val e2 = e.in ~ e.out w (e.weight ^ dw)
+            val t2 = t +~^ e2
+            t2.vertices.toSet should be ===(vs)
+            t2.vertices should have size(vs.size)
+            t2.edges.toSet should be ===((es - e) + e2)
+            t2.edges should have size(es.size)
+        }
+      }
+
+      it("should return a undirected tree with the replaced swaped edge with weight for a new weight") {
+        forAll(for(t <- genWUndiTreeParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (TreeParamData(v, vs, es), e, dw) => 
+            val t = (treeFactory.newTreeBuilder(v) ++= es).result
+            val e2 = e.out ~ e.in w (e.weight ^ dw)
+            val t2 = t +~^ e2
+            t2.vertices.toSet should be ===(vs)
+            t2.vertices should have size(vs.size)
+            t2.edges.toSet should be ===((es - e) + e2)
+            t2.edges should have size(es.size)
+        }
+      }
     }
     
     describe("-@^") {

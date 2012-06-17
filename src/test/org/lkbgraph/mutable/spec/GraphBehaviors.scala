@@ -98,6 +98,45 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Graph[X
 
       it should behave like growable[Unweighted, DiEdge]
       it should behave like growable[Unweighted, UndiEdge]
+
+      it("should replace the edge for the directed graph") {
+        forAll(for(t <- genWDiGraphParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (GraphParamData(ps, vs, es), e, dw) => 
+            val g = graphFactory[Char, Weighted[Int], DiEdge]() ++ ps
+            val e2 = e.in -> e.out w (e.weight ^ dw)
+            g +~= e2
+            g.vertices.toSet should be === vs
+            g.vertices should have size(vs.size)
+            g.edges.toSet should be === ((es - e) + e2)
+            g.edges should have size(es.size)
+        }
+      }
+
+      it("should replace the edge for the undirected graph") {
+        forAll(for(t <- genWUndiGraphParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (GraphParamData(ps, vs, es), e, dw) => 
+            val g = graphFactory[Char, Weighted[Int], UndiEdge]() ++ ps
+            val e2 = e.in ~ e.out w (e.weight ^ dw)
+            g +~= e2
+            g.vertices.toSet should be === vs
+            g.vertices should have size(vs.size)
+            g.edges.toSet should be === ((es - e) + e2)
+            g.edges should have size(es.size)
+        }
+      }
+
+      it("should replace the swaped edge for the undirected graph") {
+        forAll(for(t <- genWUndiGraphParamData; e <- Gen.oneOf(t.es.toSeq); dw <- Gen.choose(1, 1000)) yield (t, e, dw)) {
+          case (GraphParamData(ps, vs, es), e, dw) => 
+            val g = graphFactory[Char, Weighted[Int], UndiEdge]() ++ ps
+            val e2 = e.out ~ e.in w (e.weight ^ dw)
+            g +~= e2
+            g.vertices.toSet should be === vs
+            g.vertices should have size(vs.size)
+            g.edges.toSet should be === ((es - e) + e2)
+            g.edges should have size(es.size)
+        }
+      }
     }
     
     describe("-@=") {
@@ -177,9 +216,7 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Graph[X
       }
       
       it should behave like shrinkable[Unweighted, DiEdge]
-      it should behave like shrinkable[Unweighted, UndiEdge]
-      
-      //TODO add checking whether correctly replaces the edge for the edge with the weight
+      it should behave like shrinkable[Unweighted, UndiEdge]      
     }
   }
 }
