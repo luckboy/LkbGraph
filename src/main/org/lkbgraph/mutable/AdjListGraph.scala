@@ -16,6 +16,8 @@
  ******************************************************************************/
 
 package org.lkbgraph.mutable
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable.Builder
 import org.lkbgraph._
 
 /** A trait for the mutable version of the graph representation of the adjacency list.
@@ -30,7 +32,7 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
   override protected[this] def newBuilder: collection.mutable.Builder[GraphParam[V, X, E], AdjListGraph[V, X, E]] =
     AdjListGraph.newBuilder
 
-    override protected def edgeLists: collection.mutable.Map[V, List[E[V, X]]]
+  override protected def edgeLists: collection.mutable.Map[V, List[E[V, X]]]
   
   override def +@= (v: V): this.type = {
     edgeLists += (v -> edgeListFrom(v))
@@ -66,6 +68,9 @@ trait AdjListGraph[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]] extends base.AdjListGra
  */
 object AdjListGraph extends GraphFactory[AdjListGraph]
 {
+  implicit def canBuildFrom[E1[+Y1, +Z1] <: EdgeLike[Y1, Z1, E1], V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: CanBuildFrom[AdjListGraph[_, _, E1], GraphParam[V, X, E], AdjListGraph[V, X, E]] =
+    graphCanBuildFrom
+  
   def empty[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]: AdjListGraph[V, X, E] = 
     new ImplAdjListGraph[V, X, E](collection.mutable.Map())
       

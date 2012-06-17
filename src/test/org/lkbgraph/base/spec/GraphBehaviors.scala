@@ -79,9 +79,10 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
     v <- Gen.oneOf(vs.toSeq)
     es <- genUnwDiEdges(vs - v)
     us <- Gen.someOf(vs - v) 
+    us2 <- Gen.someOf((vs -- us) - v)
   } yield { 
     val vs2 = vs - v
-    (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), (v, us.map { UnwDiEdge[Char](v, _) }.toSet))
+    (GraphParamData(vs2.map(V[Char]) ++ es, vs2, es), (v, us.map { UnwDiEdge[Char](v, _) }.toSet ++ us2.map { UnwDiEdge[Char](_, v) }.toSet))
   }
   
   def graph

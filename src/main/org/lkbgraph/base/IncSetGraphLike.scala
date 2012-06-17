@@ -37,13 +37,13 @@ trait IncSetGraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: IncSetGraphLik
     edgeMap.values
     
   override def +@ (v: V): G =
-    newIncSetGraph(vertexSet + v, edgeMap.toMap)
+    newIncSetGraph(vertexSet + v, edgeMap)
     
   override def +~ (e: E[V, X]): G =
     if(e._1 != e._2) newIncSetGraph((vertexSet + e._1) + e._2 , edgeMap + (e.toUnweightedEdge -> e)) else repr
   
   override def -@ (v: V): G =
-    newIncSetGraph(vertexSet - v, edgeMap.filterNot { case (e, _) => e.in == v && (e.isDirected || e.out == v) })
+    newIncSetGraph(vertexSet - v, edgeMap.filterNot { case (e, _) => e.in == v || e.out == v })
   
   override def -~! (e: E[V, Unweighted]): G =
     if(e._1 != e._2) newIncSetGraph(vertexSet, edgeMap - e) else repr
