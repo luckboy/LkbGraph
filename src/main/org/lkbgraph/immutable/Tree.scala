@@ -78,9 +78,11 @@ object Tree extends TreeFactory[Tree]
         case Some(v) => verticesQueue(q.tail ++ childrenFrom(v), vs + v)
       }
     
-    override def -@^ (s: V): Tree[V, X, E] = {
-      val ls = if(containsVertex(s)) mChildEdgeLists -- verticesQueue(Queue(s), Set()) else mChildEdgeLists
-      new ImplTree(root, ls + (s -> Nil))
+    override def -@^ (s: V): Tree[V, X, E] = {      
+      if(containsVertex(s))
+        new ImplTree(root, (mChildEdgeLists -- verticesQueue(Queue(s), Set())) + (s -> Nil))
+      else
+        new ImplTree(root, mChildEdgeLists)
     }
   }
 }

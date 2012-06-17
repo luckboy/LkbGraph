@@ -76,7 +76,8 @@ object GraphParamGen
     def genEdges[W, X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](vs: Set[Char], us: Set[Char])(f: (Char, Char, W) => E[Char, X])(implicit arb: Arbitrary[W]): Gen[Seq[E[Char, X]]] =
       for {
         v <- Gen.oneOf(vs.toSeq)
-        (vs2, es) <- Gen.someOf(us).map2(Gen.listOfN[W](us.size, arbitrary[W])) { (us, ws) => (us, us.zip(ws).map { case (u, w) => f(v, u, w) }) }
+        n <- if(us.isEmpty) Gen.value(0) else Gen.choose(1, us.size)
+        (vs2, es) <- Gen.pick(n, us).map2(Gen.listOfN[W](us.size, arbitrary[W])) { (us, ws) => (us, us.zip(ws).map { case (u, w) => f(v, u, w) }) }
         es2 <- if(((vs - v) ++ vs2).isEmpty) Gen.value(Seq()) else genEdges((vs - v) ++ vs2, us -- vs2)(f)
       } yield es ++ es2
     

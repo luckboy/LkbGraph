@@ -178,6 +178,8 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Graph[X
       
       it should behave like shrinkable[Unweighted, DiEdge]
       it should behave like shrinkable[Unweighted, UndiEdge]
+      
+      //TODO add checking whether correctly replaces the edge for the edge with the weight
     }
   }
 }

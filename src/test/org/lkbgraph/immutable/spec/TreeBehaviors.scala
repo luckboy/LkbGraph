@@ -32,6 +32,75 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
 
   def treeFactory: TreeFactory[TT]
 
+  trait AddEdgeGens[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]
+  {
+    def treePrefix: String
+      
+    def makeEdge(v: Char, u: Char): E[Char, X]
+    
+    def genEdges(root: Char, vs: Set[Char]): Gen[Seq[E[Char, X]]]
+    
+    def genTreeParamData: Gen[TreeParamData[Char, E[Char, X]]]
+    
+    val genTreeParamDataWithoutEdge = for { 
+      vs <- genVertices
+      us <- Gen.pick(2, vs)
+      v <- Gen.oneOf((vs -- us).toSeq)
+      es <- genEdges(v, (vs -- us)) 
+    } yield {
+      val Seq(u1, u2) = us
+      (TreeParamData(v, vs -- us, es.toSet), makeEdge(u1, u2))
+    }
+
+    val genTreeParamDataWithoutEdgeThatHasInputVertexIsExists = for { 
+      vs <- genVertices
+      u1 <- Gen.oneOf(vs.toSeq)
+      u2 <- Gen.oneOf((vs - u1).toSeq)
+      v <- Gen.oneOf((vs - u2).toSeq)
+      es <- genEdges(v, (vs - u2)) 
+    } yield {
+      (TreeParamData(v, vs - u2, es.toSet), makeEdge(u1, u2))
+    }
+
+    val genTreeParamDataWithoutEdgeThatHasOutputVertexIsExists = for { 
+      vs <- genVertices
+      u1 <- Gen.oneOf(vs.toSeq)
+      u2 <- Gen.oneOf((vs - u1).toSeq)
+      v <- Gen.oneOf((vs - u1).toSeq)
+      es <- genEdges(v, (vs - u1)) 
+    } yield {
+      (TreeParamData(v, vs - u1, es.toSet), makeEdge(u1, u2))
+    }
+  }
+  
+  implicit object UnwDiAddEdgeGens extends AddEdgeGens[Unweighted, DiEdge]
+  {
+    override def treePrefix = "directed"
+      
+    override def makeEdge(v: Char, u: Char) = v -> u
+    
+    override def genEdges(root: Char, vs: Set[Char]) = genUnwDiEdges(root, vs)
+    
+    override def genTreeParamData = genUnwDiTreeParamData
+  }
+
+  implicit object UnwUndiAddEdgeGens extends AddEdgeGens[Unweighted, UndiEdge]
+  {
+    override def treePrefix = "undirected"
+      
+    override def makeEdge(v: Char, u: Char) = v ~ u
+    
+    override def genEdges(root: Char, vs: Set[Char]) = genUnwUndiEdges(root, vs)
+    
+    override def genTreeParamData = genUnwUndiTreeParamData
+  }
+  
+  def genUnwDiTreeParamDataWithoutEdgeThatHasOutputVertexIsExists = 
+    UnwDiAddEdgeGens.genTreeParamDataWithoutEdgeThatHasOutputVertexIsExists
+
+  def genUnwUndiTreeParamDataWithoutEdgeThatHasOutputVertexIsExists = 
+    UnwUndiAddEdgeGens.genTreeParamDataWithoutEdgeThatHasOutputVertexIsExists
+  
   def tree
   {
     describe("vertices") {
@@ -155,11 +224,115 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
     }
     
     describe("+~^") {
-      
+      def edgeAddable[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: AddEdgeGens[X, E]) = {
+        import gens._
+
+        it("should return a copy of the " + treePrefix + " tree without a new edge that has both vertices which are non-existent") {
+          forAll(genTreeParamDataWithoutEdge) {
+            case (TreeParamData(v, vs, es), e) =>
+              val t = (treeFactory.newTreeBuilder(v) ++= es).result
+              val t2 = t +~^ e
+              t2.vertices.toSet should be ===(vs)
+              t2.vertices should have size(vs.size)
+              t2.edges.toSet should be ===(es)
+              t2.edges should have size(es.size)
+          }
+        }
+
+        it("should return a copy of the " + treePrefix + " tree with a new edge that has the input vertex that is existent") {
+          forAll(genTreeParamDataWithoutEdgeThatHasInputVertexIsExists) {
+            case (TreeParamData(v, vs, es), e) =>
+              val t = (treeFactory.newTreeBuilder(v) ++= es).result
+              val t2 = t +~^ e
+              t2.vertices.toSet should be ===(vs + e.out)
+              t2.vertices should have size(vs.size + 1)
+              t2.edges.toSet should be ===(es + e)
+              t2.edges should have size(es.size + 1)
+          }
+        }
+
+        it("should return a copy of the " + treePrefix + " tree without a new edge that has both vertices which are existent") {
+          forAll(for(d <- genTreeParamData; e <- Gen.pick(2, d.vs).map { case Seq(v, u) => makeEdge(v, u) }) yield (d, e)) {
+            case (TreeParamData(v, vs, es), e) =>
+              val t = (treeFactory.newTreeBuilder(v) ++= es).result
+              val t2 = t +~^ e
+              t2.vertices.toSet should be ===(vs)
+              t2.vertices should have size(vs.size)
+              t2.edges.toSet should be ===(es)
+              t2.edges should have size(es.size)
+          }
+        }
+      }
+
+      it should behave like edgeAddable[Unweighted, DiEdge]
+      it should behave like edgeAddable[Unweighted, UndiEdge]
+
+      it("should return a copy of the directed tree without a new edge that has the output vertex that is existent") {
+        forAll(genUnwDiTreeParamDataWithoutEdgeThatHasOutputVertexIsExists) {
+          case (TreeParamData(v, vs, es), e) =>
+            val t = (treeFactory.newTreeBuilder(v) ++= es).result
+            val t2 = t +~^ e
+            t2.vertices.toSet should be ===(vs)
+            t2.vertices should have size(vs.size)
+            t2.edges.toSet should be ===(es)
+            t2.edges should have size(es.size)
+        }
+      }
+
+      it("should return a copy of the undirected tree with a new edge that has the output vertex that is existent") {
+        forAll(genUnwUndiTreeParamDataWithoutEdgeThatHasOutputVertexIsExists) {
+          case (TreeParamData(v, vs, es), e) =>
+            val t = (treeFactory.newTreeBuilder(v) ++= es).result
+            val t2 = t +~^ e
+            t2.vertices.toSet should be ===(vs + e.in)
+            t2.vertices should have size(vs.size + 1)
+            t2.edges.toSet should be ===(es + e)
+            t2.edges should have size(es.size + 1)
+        }
+      }
+
+      //TODO add checking whether correctly replaces the edge for edge with weight.
     }
     
     describe("-@^") {
+      it("should return a copy of the tree without the unmodified edges and vertices for a non-existent node") {
+        forAll(for {
+            vs <- genVertices
+            v <- Gen.oneOf(vs.toSeq)
+            u <- Gen.oneOf((vs - v).toSeq)
+            es <- genUnwDiEdges(v, vs - u)
+          } yield (TreeParamData(v, vs - u, es.toSet), u)) {
+          case (TreeParamData(v, vs, es), u) =>
+            val t = (treeFactory.newTreeBuilder(v) ++= es).result
+            val t2 = t -@^ u
+            t2.vertices.toSet should be ===(vs)
+            t2.vertices should have size(vs.size)
+            t2.edges.toSet should be ===(es)
+            t2.edges should have size(es.size)
+        }
+      }
       
+      it("should return a copy of the tree without the branch for the edge") {
+        forAll(for {
+          vs <- genVertices
+          (vs1, vs2) <- Gen.someOf(vs.toSeq).map { us => ((vs -- us).toSet,  us.toSet) }
+          v1 <- Gen.oneOf(vs1.toSeq)
+          v2 <- Gen.oneOf(vs2.toSeq)
+          es1 <- genUnwDiEdges(v1, vs1)
+          es2 <- genUnwDiEdges(v2, vs2)
+          u <- Gen.oneOf(vs1.toSeq)
+        } yield {
+          (TreeParamData(v1, vs1, es1.toSet), TreeParamData(v2, vs2, es2.toSet), u -> v2 unw) 
+        }) {
+          case (TreeParamData(v1, vs1, es1), TreeParamData(v2, vs2, es2), e) => 
+            val t = (treeFactory.newTreeBuilder(v1) ++= (es1 ++ es2 + e)).result
+            val t2 = t -@^ e.out
+            t2.vertices.toSet should be ===(vs1 + e.out)
+            t2.vertices should have size(vs1.size + 1)
+            t2.edges.toSet should be ===(es1 + e)
+            t2.edges should have size(es1.size + 1)
+        }
+      }
     }
   }
 }

@@ -233,6 +233,8 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
       
       it should behave like addable[Unweighted, DiEdge]
       it should behave like addable[Unweighted, UndiEdge]
+      
+      //TODO add checking whether correctly replaces edge for the edge with the weight.
     }
 
     describe("-@") {
