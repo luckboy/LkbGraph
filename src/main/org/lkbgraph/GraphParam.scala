@@ -163,7 +163,7 @@ case class UnwDiEdge[+V](in: V, out: V) extends DiEdge[V, Unweighted] with UnwEd
     this
 
   override def toString: String =
-    in + " -> " + out
+    in + "->" + out
 }
 
 /** A class for the directed edge that has weight.
@@ -194,7 +194,7 @@ case class WDiEdge[+V, +W](in: V, out: V, weight: W) extends DiEdge[V, Weighted[
     this
 
   override def toString: String =
-    in + " -> " + out + " w " + weight
+    in + "->" + out + " w(" + weight + ")"
 }
 
 /** A class for the undirected edge without weight.
@@ -237,7 +237,7 @@ case class UnwUndiEdge[+V](_1: V, _2: V) extends UndiEdge[V, Unweighted] with Un
     _1.hashCode ^ _2.hashCode
 
   override def toString: String = 
-    _1 + " ~ " + _2
+    _1 + "~" + _2
 }
 
 /** A class for the undirected edge that has weight.
@@ -277,5 +277,5 @@ case class WUndiEdge[+V, +W](_1: V, _2: V, weight: W) extends UndiEdge[V, Weight
     _1.hashCode ^ _2.hashCode ^ weight.hashCode
 
   override def toString: String =
-    _1 + " ~ " + _2 + " w " + weight
+    _1 + "~" + _2 + " w(" + weight + ")"
 }
