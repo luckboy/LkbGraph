@@ -16,6 +16,7 @@
  ******************************************************************************/
 
 package org.lkbgraph.spec
+import scala.util._
 import org.scalacheck._
 import org.scalacheck.util._
 import org.scalacheck.Arbitrary.arbitrary
@@ -110,9 +111,43 @@ object GraphParamGen
     }
   }
 
-  case class PathData[V, E](root: Char, es: Set[E])
+  case class PathParamData[V, E](root: Char, vs: Set[Char], es: Seq[E])
   
   object PathGen {
+    def genUnwDiEdges(vs: Set[Char]) = 
+      for(us <- Gen.value(Random.shuffle(vs.toSeq))) 
+        yield ((0 until (us.size - 1)).map { i => us(i) -> us(i + 1) unw })
+
+    def genUnwUndiEdges(vs: Set[Char]) = 
+      for(us <- Gen.value(Random.shuffle(vs.toSeq)))
+        yield ((0 until (us.size - 1)).map { i => us(i) ~ us(i + 1) unw })
+
+    def genWDiEdges(vs: Set[Char]) = 
+      for {
+        us <- Gen.value(Random.shuffle(vs.toSeq))
+        ws <- Gen.listOfN(us.size -1, arbitrary[Int]) 
+      } yield ((0 until (us.size - 1)).map { i => us(i) -> us(i + 1) w(ws(i)) })
+
+    def genWUndiEdges(vs: Set[Char]) = 
+      for {
+        us <- Gen.value(Random.shuffle(vs.toSeq))
+        ws <- Gen.listOfN(us.size -1, arbitrary[Int]) 
+      } yield ((0 until (us.size - 1)).map { i => us(i) ~ us(i + 1) w(ws(i)) })
+      
+    val genUnwDiPathParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genUnwDiEdges(vs)) yield {
+      PathParamData[Char, DiEdge[Char, Unweighted]](es.headOption.map { _._1 }.getOrElse(v), vs, es)
+    }
+
+    val genUnwUndiPathParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genUnwUndiEdges(vs)) yield {
+      PathParamData[Char, UndiEdge[Char, Unweighted]](es.headOption.map { _._1 }.getOrElse(v), vs, es)
+    }
     
+    val genWDiPathParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genWDiEdges(vs)) yield {
+      PathParamData[Char, DiEdge[Char, Weighted[Int]]](es.headOption.map { _._1 }.getOrElse(v), vs, es)
+    }
+    
+    val genWUndiPathParamData = for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq); es <- genWUndiEdges(vs)) yield {
+      PathParamData[Char, UndiEdge[Char, Weighted[Int]]](es.headOption.map { _._1 }.getOrElse(v), vs, es)
+    }
   }
 }
