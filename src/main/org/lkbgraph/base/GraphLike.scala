@@ -161,25 +161,97 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
    * @param s			the start vertex.
    * @return			a tree.
    */
-  def dfsFrom(s: V): immutable.Tree[V, X, E] = throw new Exception
+  def dfsFrom(s: V): immutable.Tree[V, X, E] = {
+    val stck = collection.mutable.Stack[Iterator[E[V, X]]]()
+    val visiteds = collection.mutable.Set[V]()
+    var t = immutable.Tree[V, X, E](V(s))
+    stck.push(edgesFrom(s).iterator)
+    visiteds += s
+    while(!stck.isEmpty) {
+      val iter = stck.head
+      if(iter.hasNext) {
+        val e = iter.next()
+        if(!visiteds(e.out)) {
+          stck.push(edgesFrom(e.out).iterator)
+          visiteds += e.out
+          t = t +~^ e
+        }
+      } else
+        stck.pop()
+    }
+    t
+  }
   
   /** Creates a tree by the DFS algorithm that begins searching for the stack.
    * @param ss			the stack.
    * @return			a trees.
    */
-  def dfsFromStack(stck: Seq[V]): Map[V, immutable.Tree[V, X, E]] = throw new Exception
+  def dfsFromStack(ss: Seq[V]): Map[V, immutable.Tree[V, X, E]] = {
+    val stck = collection.mutable.Stack[(Iterator[E[V, X]], Int)]()
+    val visiteds = collection.mutable.Set[V]()
+    val ts = ss.map { s => immutable.Tree[V, X, E](V(s)) }.toArray
+    stck ++= (0 until ss.size).map { i => (edgesFrom(ss(i)).iterator, i) }
+    visiteds ++= ss
+    while(!stck.isEmpty) {
+      val (iter, i) = stck.head
+      if(iter.hasNext) {
+        val e = iter.next()
+        if(!visiteds.contains(e.out)) {
+          stck.push((edgesFrom(e.out).iterator, i))
+          visiteds += e.out
+          ts(i) = ts(i) +~^ e
+        }
+      } else
+        stck.pop()
+    }
+    ts.map { t => (t.root, t) }.toMap
+  }
   
   /** Creates a tree by the BFS algorithm.
    * @param s			the start vertex.
    * @return			a tree.
    */
-  def bfsFrom(s: V): immutable.Tree[V, X, E] = throw new Exception
+  def bfsFrom(s: V): immutable.Tree[V, X, E] = {
+    val q = collection.mutable.Queue[V]()
+    val visiteds = collection.mutable.Set[V]()
+    var t = immutable.Tree[V, X, E](V(s))
+    q += s
+    visiteds += s
+    while(!q.isEmpty){
+      val v = q.dequeue()
+      for(e <- edgesFrom(v)) {
+        if(!visiteds.contains(e.out)) {
+          q.enqueue(e.out)
+          visiteds += e.out
+          t = t +~^ e
+        }
+      }
+    }
+    t
+  }
 
   /** Creates a tree by the BFS algorithm that begins searching for the queue.
    * @param ss			the queue.
    * @return			a trees.
    */
-  def bfsFromQueue(q: Seq[V]): Map[V, immutable.Tree[V, X, E]] = throw new Exception
+  def bfsFromQueue(ss: Seq[V]): Map[V, immutable.Tree[V, X, E]] = {
+    val q = collection.mutable.Queue[(V, Int)]()
+    val visiteds = collection.mutable.Set[V]()
+    val ts = ss.map { s => immutable.Tree[V, X, E](V(s)) }.toArray
+    q ++= (0 until ss.size).map { i => (ss(i), i) }
+    visiteds ++= ss
+    while(!q.isEmpty) {
+      val (v, i) = q.dequeue()
+      for(e <- edgesFrom(v)) {
+        if(!visiteds.contains(e.out)) {
+          q.enqueue((e.out, i))
+          visiteds += e.out
+          ts(i) = ts(i) +~^ e
+        }
+      }
+    }
+    ts.map { t => (t.root, t) }.toMap
+  }
   
   /** Checks whether the graph is connected. */
   def isConnected: Boolean = throw new Exception
