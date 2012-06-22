@@ -43,7 +43,14 @@ object Path extends PathFactory[Path]
     override def +~/ (e: E[V, X]): Path[V, X, E] = {
       val v = edgeSeq.lastOption.map { le => le.out }.getOrElse(root)
       val e2 = if(!e.isDirected && e.in != v) e.swap else e
-      new ImplPath(root, edgeSeq :+ e)
+      if(e2.in == v && !containsVertex(e2.out)) {
+        new ImplPath(root, edgeSeq :+ e2)
+      } else {
+    	val es = edgeSeq.map {
+    	  te => if(te.in == e.in && te.out == e.out) e else if(!e.isDirected && te.in == e.out && te.out == e.in) e.swap else te
+    	}
+    	new ImplPath(root, es)
+      }
     }
       
     override def -@/ (s: V): Path[V, X, E] =
