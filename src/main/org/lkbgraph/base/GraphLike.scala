@@ -100,6 +100,13 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   def containsEdge(e: E[V, X]): Boolean =
     edgeSet.contains(e)
   
+  /** Return the neighbors for the specified vertex.
+   * @param v			the vertex.
+   * @return			the neighbors. 
+   */
+  def neighbors(v: V): Iterable[V] =
+    verticesFrom(v).toSet | verticesTo(v).toSet 
+    
   /** Returns a copy of the graph with a new vertex.
    * @param v			a new vertex.
    * @return			a copy of the graph.
@@ -257,7 +264,9 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   def isConnected: Boolean = throw new Exception
   
   /** Checks whether the graph is complete. */
-  def isComplete: Boolean = throw new Exception
+  def isComplete: Boolean =
+    // This solution is correct if this graph isn't multigraph or hypergraph.
+    vertices.forall { neighbors(_).size == vertices.size -1 }
   
   /** Creates a transposed graph from the graph. */
   def transposed: G = throw new Exception
