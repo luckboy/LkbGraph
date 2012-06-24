@@ -470,6 +470,17 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
   def dfs
   {
     describe("dfsFrom") {
+      it("should return a empty tree for the graph that has only the vertices") {
+        forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
+          case (vs, v) =>
+            val g = graphFactory[VertexType, Unweighted, DiEdge]()
+            val t = g.dfsFrom(v)
+            t.vertices.toSet should be === Set(v)
+            t.vertices should have size(1)
+            t.edges.toSet should be === Set()
+        }
+      }
+      
       it("should return a tree with the first vertices from the start vertex and the second vertices from the first vertices") {
         forAll(genUnwDiEdges123) {
           case Edges123(v, es1, es12, _, _, _, _, _) =>
@@ -504,6 +515,17 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
     }
     
     describe("dfsFromStack") {
+      it("should return a empty trees for the graph that has only the vertices") {
+        forAll(genVertices) {
+          vs =>
+            val g = graphFactory[VertexType, Unweighted, DiEdge]()
+            val ts = g.dfsFromStack(vs.toSeq)
+            ts.map { case (v, t) => (v, t.vertices.toSet)  } should be === (vs.map { v => (v, Set(v)) }.toMap)
+            ts should have size(vs.size)
+            ts.map { case (v, t) => (v, t.edges.toSet)  } should be === (vs.map { v => (v, Set()) }.toMap)
+        }
+      }
+
       it("should return a tree with the first vertices from the start vertex and the second vertices from the first vertices") {
         forAll(genUnwDiEdges123) {
           case Edges123(v, es1, es12, _, _, _, _, _) =>
@@ -564,6 +586,17 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
   def bfs
   {
     describe("bfsFrom") {
+      it("should return a empty tree for the graph that has only the vertices") {
+        forAll(for(vs <- genVertices; v <- Gen.oneOf(vs.toSeq)) yield (vs, v)) {
+          case (vs, v) =>
+            val g = graphFactory[VertexType, Unweighted, DiEdge]()
+            val t = g.bfsFrom(v)
+            t.vertices.toSet should be === Set(v)
+            t.vertices should have size(1)
+            t.edges.toSet should be === Set()
+        }
+      }
+
       it("should return a tree with the first vertices from the start vertex and the second vertices from the first vertices") {
         forAll(genUnwDiEdges123) {
           case Edges123(v, es1, es12, es10, es11, es20, es21, es22) =>
@@ -590,6 +623,17 @@ trait GraphBehaviors[GG[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: base.Gr
     } 
     
     describe("bfsFromQueue") {
+      it("should return a empty trees for the graph that has only the vertices") {
+        forAll(genVertices) {
+          vs =>
+            val g = graphFactory[VertexType, Unweighted, DiEdge]()
+            val ts = g.bfsFromQueue(vs.toSeq)
+            ts.map { case (v, t) => (v, t.vertices.toSet)  } should be === (vs.map { v => (v, Set(v)) }.toMap)
+            ts should have size(vs.size)
+            ts.map { case (v, t) => (v, t.edges.toSet)  } should be === (vs.map { v => (v, Set()) }.toMap)
+        }
+      }
+
       it("should return a tree with the first vertices from the start vertex and the second vertices from the first vertices") {
         forAll(genUnwDiEdges123) {
           case Edges123(v, es1, es12, es10, es11, es20, es21, es22) =>
