@@ -197,7 +197,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
     val stck = collection.mutable.Stack[(Iterator[E[V, X]], Int)]()
     val visiteds = collection.mutable.Set[V]()
     val ts = ss.map { s => immutable.Tree[V, X, E](V(s)) }.toArray
-    stck ++= (0 until ss.size).map { i => (edgesFrom(ss(i)).iterator, i) }
+    for(i <- 0 until ss.size) stck.push((edgesFrom(ss(i)).iterator, i))
     visiteds ++= ss
     while(!stck.isEmpty) {
       val (iter, i) = stck.head
@@ -245,7 +245,7 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
     val q = collection.mutable.Queue[(V, Int)]()
     val visiteds = collection.mutable.Set[V]()
     val ts = ss.map { s => immutable.Tree[V, X, E](V(s)) }.toArray
-    q ++= (0 until ss.size).map { i => (ss(i), i) }
+    for(i <- 0 until ss.size) q.enqueue((ss(i), i))
     visiteds ++= ss
     while(!q.isEmpty) {
       val (v, i) = q.dequeue()

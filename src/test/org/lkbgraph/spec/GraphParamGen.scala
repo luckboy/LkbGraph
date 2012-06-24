@@ -24,6 +24,8 @@ import org.lkbgraph._
 
 object GraphParamGen 
 {
+  type VertexType = Char
+  
   val genVertices = Gen.containerOf[Set, Char](Gen.alphaChar)
   
   case class GraphParamData[GP, V, E](ps: Set[GP], vs: Set[V], es: Set[E])
