@@ -100,12 +100,19 @@ trait GraphLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: GraphLike[V, X, E, G
   def containsEdge(e: E[V, X]): Boolean =
     edgeSet.contains(e)
   
-  /** Return the neighbors for the specified vertex.
+  /** Returns the neighbors for the specified vertex.
    * @param v			the vertex.
    * @return			the neighbors. 
    */
   def neighbors(v: V): Iterable[V] =
-    verticesFrom(v).toSet | verticesTo(v).toSet 
+    verticesFrom(v).toSet | (if(hasDirectedEdges) verticesTo(v).toSet else Set[V]())
+    
+  /** Returns the neighbor edges for the specified vertex.
+   * @param v			the vertex
+   * @return			the neighbor edges.
+   */
+  def neighborEdges(v: V): Iterable[E[V, X]] =
+    edgesFrom(v).toSet | (if(hasDirectedEdges) edgesTo(v).toSet else Set[E[V, X]]())
     
   /** Returns a copy of the graph with a new vertex.
    * @param v			a new vertex.
