@@ -51,15 +51,15 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   def root: V
 
   /** The branches from the root. */
-  def branches: Iterable[Tree[V, X, E]] =
+  def branches: Iterable[T] =
     branchesFrom(root)
     
   /** The branches from the specified node. 
    * @param s			the start node.
    * @return			the branches.
    */
-  def branchesFrom(s: V): Iterable[Tree[V, X, E]] = 
-    childrenFrom(s).map(bfsFrom)
+  def branchesFrom(s: V): Iterable[T] = 
+    childrenFrom(s).map(subtreeFrom)
 
   /** The children from the root. */
   def children: Iterable[V] =
@@ -76,7 +76,7 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
   def childEdges: Iterable[E[V, X]] =
     childEdgesFrom(root)
   
-  /** The child edges the specified node. 
+  /** The child edges from the specified node. 
    * @param s			the start node.
    * @return			the child edges.
    */
@@ -96,6 +96,24 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @return			a copy of the tree without the branch.
    */
   def -@^ (s: V): T  
+  
+  /** The subtree from the specified node.
+   * @param s			the node.
+   * @return			the subtree.
+   */
+  def subtreeFrom(s: V): T = {
+    val q = collection.mutable.Queue[V]()
+    var t = newTreeBuilder(s).result
+    q.enqueue(s)
+    while(!q.isEmpty) {
+      val v = q.dequeue()
+      for(e <- childEdgesFrom(v)) {
+        q.enqueue(e.out)
+        t = t +~^ e 
+      }
+    }
+    t
+  }
   
   /** The pre-order traversal sequence. */
   def preOrder: Seq[V] =
