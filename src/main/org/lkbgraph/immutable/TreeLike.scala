@@ -58,7 +58,8 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @param s			the start node.
    * @return			the branches.
    */
-  def branchesFrom(s: V): Iterable[Tree[V, X, E]] = throw new Exception
+  def branchesFrom(s: V): Iterable[Tree[V, X, E]] = 
+    childrenFrom(s).map(bfsFrom)
 
   /** The children from the root. */
   def children: Iterable[V] =
@@ -104,7 +105,25 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @param s			the start node.
    * @return			a sequence.
    */
-  def preOrderFrom(s: V): Seq[V] = throw new Exception
+  def preOrderFrom(s: V): Seq[V] = {
+    if(containsVertex(s)) {
+      val stck = collection.mutable.Stack[Iterator[E[V, X]]]()
+      val seq = collection.mutable.ListBuffer[V]()
+      stck.push(childEdgesFrom(s).iterator)
+      seq += s
+      while(!stck.isEmpty) {
+        val iter = stck.head
+        if(iter.hasNext) {
+          val e = iter.next()
+          stck.push(childEdgesFrom(e.out).iterator)
+          seq += e.out
+        } else
+          stck.pop()
+      }
+      seq
+    } else
+      Seq.empty
+  }
 
   /** The post-order traversal sequence. */
   def postOrder: Seq[V] =
@@ -114,7 +133,25 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @param s			the start node.
    * @return			a sequence.
    */
-  def postOrderFrom(s: V): Seq[V] = throw new Exception
+  def postOrderFrom(s: V): Seq[V] = {
+    if(containsVertex(s)) {
+      val stck = collection.mutable.Stack[(Iterator[E[V, X]], V)]()
+      val seq = collection.mutable.ListBuffer[V]()
+      stck.push((childEdgesFrom(s).iterator, s))
+      while(!stck.isEmpty) {
+        val (iter, v) = stck.head
+        if(iter.hasNext) {
+          val e = iter.next()
+          stck.push((childEdgesFrom(e.out).iterator, e.out))
+        } else {
+          seq += v
+          stck.pop()
+        }
+      }
+      seq
+    } else
+      Seq.empty
+  }
 
   /** The level-order traversal sequence. */
   def levelOrder: Seq[V] =
@@ -124,7 +161,23 @@ trait TreeLike[V, X, E[+Y, +Z] <: EdgeLike[Y, Z, E], +G <: base.GraphLike[V, X, 
    * @param s			the start node.
    * @return			a sequence.
    */
-  def levelOrderFrom(s: V): Seq[V] = throw new Exception
+  def levelOrderFrom(s: V): Seq[V] = {
+    if(containsVertex(s)) {
+      val q = collection.mutable.Queue[V]()
+      val seq = collection.mutable.ListBuffer[V]()
+      q.enqueue(s)
+      seq += s
+      while(!q.isEmpty) {
+        val v = q.dequeue()
+        for(e <- childEdgesFrom(v)) {
+          q.enqueue(e.out)
+          seq += e.out
+        }
+      }
+      seq
+    } else
+      Seq.empty
+  }
   
   override def edgesFrom(s: V): Iterable[E[V, X]] =
     childEdgesFrom(s) ++ (if(hasUndirectedEdges) edges.filter { _.out == s } else Nil)
