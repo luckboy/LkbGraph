@@ -371,5 +371,128 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
         }
       }
     }
+    
+    it should behave like treeTraversal
+  }
+
+  case class TraversalData[V, E](v: V, vs1: Seq[V], vss2: Seq[Seq[V]], es1: Seq[E], ess2: Seq[Seq[E]])
+
+  trait TraversalGens[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]]  
+  {
+    def treePrefix: String
+    
+    def makeEdge(v: VertexType, u: VertexType): E[VertexType, X]
+    
+    def genTraversalData: Gen[TraversalData[VertexType, E[VertexType, X]]] = for {
+      vs <- genVertices
+      v0 <- Gen.oneOf(vs.toSeq)
+      
+      vs1 <- Gen.pick(4, vs - v0)
+      
+      vs2 <- Gen.pick(3, vs -- vs1 - v0)
+      vs3 <- Gen.pick(4, vs -- vs1 -- vs2 - v0)
+      vs4 <- Gen.pick(3, vs -- vs1 -- vs2 -- vs3 - v0)
+    } yield {
+      val es1 = vs1.map { makeEdge(v0, _) }
+      val es2 = vs2.map { makeEdge(vs1(0), _) }
+      val es3 = vs3.map { makeEdge(vs1(2), _) }
+      val es4 = vs4.map { makeEdge(vs1(3), _) }
+      TraversalData(v0, vs1, Seq(vs2, Seq(), vs3, vs4), es1, Seq(es2, Seq(), es3, es4))
+    }
+  }
+  
+  implicit object UnwDiTraversalGens extends TraversalGens[Unweighted, DiEdge]
+  {
+    override def treePrefix = "directed"
+    
+    override def makeEdge(v: VertexType, u: VertexType) = v -> u unw
+  }
+
+  implicit object UnwUndiTraversalGens extends TraversalGens[Unweighted, UndiEdge]
+  {
+    override def treePrefix = "undirected"
+    
+    override def makeEdge(v: VertexType, u: VertexType) = v ~ u
+  }
+  
+  def treeTraversal
+  { 
+    describe("preOrderFrom") {
+      def traversal[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
+        import gens._
+        
+        it("should return the pre-order traversal sequence for the root and " + treePrefix + " tree") {
+          forAll(genTraversalData) {
+            case TraversalData(v0, vs1, vss2, es1, ess2) =>
+              val t = (treeFactory.newTreeBuilder(v0) ++= es1 ++ ess2.flatten).result
+              val seq = t.preOrderFrom(v0)
+              //println(seq)
+              seq.first should be ===(v0)
+              seq should have size(seq.toSeq.size)
+              for((u, us) <- vs1.zip(vss2)) {
+                seq.indexOf(u) should be >=(1)
+                if(!us.isEmpty) {
+                  //println(u)
+                  //println(us.map { seq.indexOf(_) })
+                  seq.indexOf(u) should be ===(us.map { seq.indexOf(_) }.min - 1)
+                  us.map { seq.indexOf(_) }.toSet should be ===((us.map { seq.indexOf(_) }.min to us.map { seq.indexOf(_) }.max).toSet)
+                }
+              }
+          }
+        }
+      }
+      
+      it should behave like traversal[Unweighted, DiEdge]
+      it should behave like traversal[Unweighted, UndiEdge]
+    }
+    
+    describe("postOrderFrom") {
+      def traversal[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
+        import gens._
+        
+        it("should return the post-order traversal sequence for the root and " + treePrefix + " tree") {
+          forAll(genTraversalData) {
+            case TraversalData(v0, vs1, vss2, es1, ess2) =>
+              val t = (treeFactory.newTreeBuilder(v0) ++= es1 ++ ess2.flatten).result
+              val seq = t.postOrderFrom(v0)
+              //println(seq)
+              seq.last should be ===(v0)
+              seq should have size(seq.toSeq.size)
+              for((u, us) <- vs1.zip(vss2)) {
+                seq.indexOf(u) should be >=(1)
+                if(!us.isEmpty) {
+                  //println(u)
+                  //println(us.map { seq.indexOf(_) })
+                  seq.indexOf(u) should be ===(us.map { seq.indexOf(_) }.max + 1)
+                  us.map { seq.indexOf(_) }.toSet should be ===((us.map { seq.indexOf(_) }.min to us.map { seq.indexOf(_) }.max).toSet)
+                }
+              }
+          }
+        }
+      }
+
+      it should behave like traversal[Unweighted, DiEdge]
+      it should behave like traversal[Unweighted, UndiEdge]
+    }
+    
+    describe("levelOrderFrom") {
+      def traversal[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
+        import gens._
+        
+        it("should return the level-order traversal sequence for the root and " + treePrefix + " tree") {
+          forAll(genTraversalData) {
+            case TraversalData(v0, vs1, vss2, es1, ess2) =>
+              val t = (treeFactory.newTreeBuilder(v0) ++= es1 ++ ess2.flatten).result
+              val seq = t.levelOrderFrom(v0)
+              seq.first should be ===(v0)
+              (0 until vs1.size).map { i => seq(i + 1) }.toSet should be ===(vs1.toSet)
+              (0 until vss2.flatten.size).map { i => seq(i + vs1.size + 1) }.toSet should be ===(vss2.flatten.toSet)
+          }
+        }
+      }
+
+      it should behave like traversal[Unweighted, DiEdge]
+      it should behave like traversal[Unweighted, UndiEdge]
+    }
   }
 }
