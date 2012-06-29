@@ -382,8 +382,10 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
     def treePrefix: String
     
     def makeEdge(v: VertexType, u: VertexType): E[VertexType, X]
+
+    def genEdges(root: VertexType, vs: Set[VertexType]): Gen[Seq[E[VertexType, X]]]
     
-    def genTraversalData: Gen[TraversalData[VertexType, E[VertexType, X]]] = for {
+    def genTraversalData = for {
       vs <- genVertices
       v0 <- Gen.oneOf(vs.toSeq)
       
@@ -399,6 +401,16 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
       val es4 = vs4.map { makeEdge(vs1(3), _) }
       TraversalData(v0, vs1, Seq(vs2, Seq(), vs3, vs4), es1, Seq(es2, Seq(), es3, es4))
     }
+    
+    def genTreeWithSubtree = for {
+      vs <- genVertices
+      vs2 <- Gen.someOf(vs)
+      v1 <- Gen.oneOf((vs -- vs2).toSeq)
+      v2 <- Gen.oneOf(vs2.toSeq)
+      u1 <- Gen.oneOf((vs -- vs2 - v1).toSeq)
+      es1 <- genEdges(v1, vs -- vs2)
+      es2 <- genEdges(v2, vs2.toSet)
+    } yield (TreeParamData(v1, vs -- vs2, es1.toSet), TreeParamData(v2, vs2.toSet, es2.toSet), makeEdge(u1, v2))
   }
   
   implicit object UnwDiTraversalGens extends TraversalGens[Unweighted, DiEdge]
@@ -406,6 +418,8 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
     override def treePrefix = "directed"
     
     override def makeEdge(v: VertexType, u: VertexType) = v -> u unw
+
+    override def genEdges(root: VertexType, vs: Set[VertexType]) = genUnwDiEdges(root, vs)
   }
 
   implicit object UnwUndiTraversalGens extends TraversalGens[Unweighted, UndiEdge]
@@ -413,6 +427,8 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
     override def treePrefix = "undirected"
     
     override def makeEdge(v: VertexType, u: VertexType) = v ~ u
+
+    override def genEdges(root: VertexType, vs: Set[VertexType]) = genUnwUndiEdges(root, vs)
   }
   
   def treeTraversal
@@ -421,13 +437,13 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
       def traversal[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
         import gens._
         
-        it("should return the pre-order traversal sequence for the root and " + treePrefix + " tree") {
+        it("should return the pre-order traversal sequence for the root and the " + treePrefix + " tree") {
           forAll(genTraversalData) {
             case TraversalData(v0, vs1, vss2, es1, ess2) =>
               val t = (treeFactory.newTreeBuilder(v0) ++= es1 ++ ess2.flatten).result
               val seq = t.preOrderFrom(v0)
               //println(seq)
-              seq.first should be ===(v0)
+              (seq.first: VertexType) should be ===(v0)
               seq should have size(seq.toSeq.size)
               for((u, us) <- vs1.zip(vss2)) {
                 seq.indexOf(u) should be >=(1)
@@ -440,6 +456,16 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
               }
           }
         }
+        
+        it("should return the vertices from the specified vertex for the " + treePrefix + " tree") {
+          forAll(genTreeWithSubtree) {
+            case (TreeParamData(v1, vs1, es1), TreeParamData(v2, vs2, es2), e) =>
+              val t = (treeFactory.newTreeBuilder(v1) ++= es1 ++ es2 + e).result
+              val seq = t.preOrderFrom(v2)
+              seq.toSet should be ===(vs2)
+              seq should have size(vs2.size)
+          }
+        }
       }
       
       it should behave like traversal[Unweighted, DiEdge]
@@ -450,13 +476,13 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
       def traversal[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
         import gens._
         
-        it("should return the post-order traversal sequence for the root and " + treePrefix + " tree") {
+        it("should return the post-order traversal sequence for the root and the " + treePrefix + " tree") {
           forAll(genTraversalData) {
             case TraversalData(v0, vs1, vss2, es1, ess2) =>
               val t = (treeFactory.newTreeBuilder(v0) ++= es1 ++ ess2.flatten).result
               val seq = t.postOrderFrom(v0)
               //println(seq)
-              seq.last should be ===(v0)
+              (seq.last: VertexType) should be ===(v0)
               seq should have size(seq.toSeq.size)
               for((u, us) <- vs1.zip(vss2)) {
                 seq.indexOf(u) should be >=(1)
@@ -469,6 +495,16 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
               }
           }
         }
+
+        it("should return the vertices from the specified vertex for the " + treePrefix + " tree") {
+          forAll(genTreeWithSubtree) {
+            case (TreeParamData(v1, vs1, es1), TreeParamData(v2, vs2, es2), e) =>
+              val t = (treeFactory.newTreeBuilder(v1) ++= es1 ++ es2 + e).result
+              val seq = t.postOrderFrom(v2)
+              seq.toSet should be ===(vs2)
+              seq should have size(vs2.size)
+          }
+        }
       }
 
       it should behave like traversal[Unweighted, DiEdge]
@@ -479,20 +515,49 @@ trait TreeBehaviors[TT[XV, XX, XE[+XY, +XZ] <: EdgeLike[XY, XZ, XE]] <: Tree[XV,
       def traversal[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
         import gens._
         
-        it("should return the level-order traversal sequence for the root and " + treePrefix + " tree") {
+        it("should return the level-order traversal sequence for the root and the " + treePrefix + " tree") {
           forAll(genTraversalData) {
             case TraversalData(v0, vs1, vss2, es1, ess2) =>
               val t = (treeFactory.newTreeBuilder(v0) ++= es1 ++ ess2.flatten).result
               val seq = t.levelOrderFrom(v0)
-              seq.first should be ===(v0)
+              (seq.first: VertexType) should be ===(v0)
               (0 until vs1.size).map { i => seq(i + 1) }.toSet should be ===(vs1.toSet)
               (0 until vss2.flatten.size).map { i => seq(i + vs1.size + 1) }.toSet should be ===(vss2.flatten.toSet)
+          }
+        }
+
+        it("should return the vertices from the specified vertex for the " + treePrefix + " tree") {
+          forAll(genTreeWithSubtree) {
+            case (TreeParamData(v1, vs1, es1), TreeParamData(v2, vs2, es2), e) =>
+              val t = (treeFactory.newTreeBuilder(v1) ++= es1 ++ es2 + e).result
+              val seq = t.levelOrderFrom(v2)
+              seq.toSet should be ===(vs2)
+              seq should have size(vs2.size)
           }
         }
       }
 
       it should behave like traversal[Unweighted, DiEdge]
       it should behave like traversal[Unweighted, UndiEdge]
+    }
+    
+    describe("subtreeFrom") {
+      def subtree[X, E[+Y, +Z] <: EdgeLike[Y, Z, E]](implicit gens: TraversalGens[X, E]) = {
+        import gens._
+
+        it("should return the subtree that has the root is the specified vertex for the " + treePrefix + " tree") {
+          forAll(genTreeWithSubtree) {
+            case (TreeParamData(v1, vs1, es1), TreeParamData(v2, vs2, es2), e) =>
+              val t = (treeFactory.newTreeBuilder(v1) ++= es1 ++ es2 + e).result
+              val st = t.subtreeFrom(v2).treeRepr
+              (st.root: VertexType) should be ===(v2)
+              st.vertices.toSet should be ===(vs2)
+              st.vertices should have size(vs2.size)
+              st.edges.toSet should be ===(es2)
+              st.edges should have size(es2.size)
+          }
+        }
+      }
     }
   }
 }
