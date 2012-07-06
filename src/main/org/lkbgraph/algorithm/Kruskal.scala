@@ -44,7 +44,7 @@ class Kruskal[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(imp
       val ds2 = dsns(e._2).toDisjointSet
       // Whether does an edge connect two unconnected trees?
       if(ds1 != ds2) {
-        // An edge doesn't connect two unconnected trees, and then there connect two unconnected trees.
+        // An edge connects two unconnected trees and then there connect two unconnected trees into one tree.
         ds1 |= ds2
         val fs = fls(e._1)
         fs.insert(fls(e._2))
