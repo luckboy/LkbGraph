@@ -35,7 +35,7 @@ class Kruskal[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(imp
   /** Finds the minimum spanning trees for the connected components by Kruskal's algorithm. */
   def kruskalMinSpanningTrees: Set[G] = {
     val es = g.edges.toSeq.sortWith { (e1, e2) => e1.weight < e1.weight }
-    val dsns = g.vertices.map { v => (v, DisjointSet.Node(())) }.toMap
+    val dsns = g.vertices.map { v => (v, DisjointSet.Node(v)) }.toMap
     val fls = collection.mutable.Map() ++ g.vertices.map { 
       (_, collection.mutable.DoubleLinkedList[UndiEdge[V, Weighted[W]]]())
     }
@@ -52,7 +52,9 @@ class Kruskal[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(imp
         fls(e._2) = fs
       }
     }
-    fls.values.map { fs => (g.newGraphBuilder ++= fs).result }.toSet
+    dsns.values.map { _.root }.toSet.map { 
+      dsn: DisjointSet.Node[V] => (g.newGraphBuilder += V(dsn.value) ++= fls(dsn.value) ).result
+    }
   }
 }
 
