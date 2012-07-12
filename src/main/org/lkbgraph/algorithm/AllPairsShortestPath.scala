@@ -44,13 +44,3 @@ class AllPairsShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.Graph
   def allShortestPathAndMinDists(implicit strategy: AllPairsShortestPathStrategy): Map[(V, V), (Path[V, Weighted[W], E], W)] =
     strategy.allShortestPathsAndMinDists[V, W, E, G](g)
 }
-
-/** A singleton for the all pairs shortest path problem.
- * 
- * @author Łukasz Szpakowski
- */
-object AllPairsShortestPath
-{
-  implicit def graphToAllPairsShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V, Weighted[W], E, G]](g: base.GraphBound[V, Weighted[W], E, G])(implicit num: Numeric[W]) =
-    new AllPairsShortestPath[V, W, E, base.GraphBound[V, Weighted[W], E, G]](g)
-}

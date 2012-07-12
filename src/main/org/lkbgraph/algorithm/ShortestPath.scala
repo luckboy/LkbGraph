@@ -77,13 +77,3 @@ class ShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V,
   def shortestPathAndMinDistsFrom(s: V, t: V)(implicit strategy: ShortestPathStrategy): Map[V, (Path[V, Weighted[W], E], W)] =
     strategy.shortestPathsAndMinDistsFrom[V, W, E, G](g, s)
 }
-
-/** A singleton for the single source shortest path problem.
- * 
- * @author Łukasz Szpakowski
- */
-object ShortestPath
-{
-  implicit def graphToShortestPath[V, W, E[+Y, +Z] <: EdgeLike[Y, Z, E], G <: base.GraphBound[V, Weighted[W], E, G]](g: base.GraphBound[V, Weighted[W], E, G])(implicit num: Numeric[W]) =
-    new ShortestPath[V, W, E, base.GraphBound[V, Weighted[W], E, G]](g)
-}

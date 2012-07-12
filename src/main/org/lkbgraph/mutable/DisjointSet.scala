@@ -63,7 +63,7 @@ class DisjointSet[T](private val mNode: DisjointSet.Node[T])
   
   override def equals(that: Any): Boolean =
     that match {
-      case node: Node[T] => mNode.root eq node.root
+      case set: DisjointSet[T] => mNode.root eq set.mNode.root
       case _             => false
     }
   

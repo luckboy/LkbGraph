@@ -52,25 +52,33 @@ class Prim[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implic
     val b = g.newGraphBuilder
     if(g.containsVertex(s)) {
       val n = g.vertices.size
-      val q = collection.mutable.PriorityQueue[UndiEdge[V, Weighted[W]]]()(new Ordering[UndiEdge[V, Weighted[W]]] {
+      val q = new java.util.PriorityQueue[UndiEdge[V, Weighted[W]]](g.vertices.size, new java.util.Comparator[UndiEdge[V, Weighted[W]]] {
         override def compare(e1: UndiEdge[V, Weighted[W]], e2: UndiEdge[V, Weighted[W]]): Int =
-          -cmp.compare(e1.weight, e2.weight)
+          cmp.compare(e1.weight, e2.weight)
       })
-      val vs = collection.mutable.Set[V](s)
+      val es = collection.mutable.Map[V, UndiEdge[V, Weighted[W]]]()
+      val vs = collection.mutable.Set[V]()
+      vs += s
       b += V(s)
-      for(e <- g.edgesFrom(s)) {
-        q.enqueue(e)
-        vs += e.out
-        b += e
+      for(e <- g.edgesFrom(s)) { 
+        q.add(e)
+        es += (e.out -> e)
       }
       while(!q.isEmpty) {
-        val v = q.dequeue().out 	// the vertex that has minimum weight
-        val es = g.edgesFrom(v).filterNot { e => vs.contains(e.out) }
-        if(!es.isEmpty) {
-          val minE = es.minBy { _.weight }
-          q.enqueue(minE)
-          vs += minE.out
-          b += minE
+        val e = q.poll()	// the edge that has minimum weight
+        es -= e.out
+        val v = e.out
+        if(!vs.contains(v)) {
+          vs += v
+          b += e
+          for(e <- g.edgesFrom(v).filterNot { e => vs.contains(e.out) }) {
+            if(es.contains(e.out)) {
+              q.remove(e)
+              es -= e.out
+            }
+            q.add(e)
+            es += (e.out -> e)
+          }
         }
       }
     }
@@ -83,10 +91,7 @@ class Prim[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implic
  * @author Łukasz Szpakowski
  */
 object Prim extends MinSpanningTreeStrategy
-{  
-  implicit def graphToPrim[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: base.GraphBound[V, Weighted[W], UndiEdge, G])(implicit cmp: Ordering[W]) =
-    new Prim[V, W, base.GraphBound[V, Weighted[W], UndiEdge, G]](g)
-
+{
   override def minSpanningTree[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W]): Option[G] =
     new Prim[V, W, G](g).primMinSpanningTree
     

@@ -15,21 +15,22 @@
  * along with this library.  If not, see <http://www.gnu.org/licenses/>.
  ******************************************************************************/
 
-package org.lkbgraph.algorithm
+package org.lkbgraph.algorithm.spec
+import org.scalatest.Spec
+import org.junit.runner.RunWith
+import org.scalatest.junit.JUnitRunner
 import org.lkbgraph._
 import org.lkbgraph.immutable._
+import org.lkbgraph.algorithm._
 
-/** A class for the minimum spanning tree.
- * 
- * @author Łukasz Szpakowski
- */
-class MinSpanningTree[V, W, G <: base.GraphBound[V, Weighted[W], UndiEdge, G]](g: G)(implicit cmp: Ordering[W])
+@RunWith(classOf[JUnitRunner])
+class MinSpanningTreeSpec extends Spec with MinSpanningTreeBehaviors[Graph]
 {
-  /** Finds the minimum spanning tree. */
-  def minSpanningTree(implicit strategy: MinSpanningTreeStrategy): Option[G] =
-    strategy.minSpanningTree[V, W, G](g)
-
-  /** Finds the minimum spanning trees for the connected components. */
-  def minSpanningTrees(implicit strategy: MinSpanningTreeStrategy): Set[G] =
-    strategy.minSpanningTrees[V, W, G](g)
+  override def graphFactory = Graph
+  
+  override def minSpanningTreeStrategy = Kruskal
+  
+  describe("A Kruskal") {
+    it should behave like minSpanningTree
+  }
 }
